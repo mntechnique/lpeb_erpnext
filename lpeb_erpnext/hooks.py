@@ -112,6 +112,6 @@ app_license = "GPLv3"
 # }
 
 fixtures = [{"dt":"Custom Field", "filters": [["name", "in",
-                                                ["Item lp_item_sub_category", "Item lp_item_category"]]]},
+                                                ["Item-lp_item_sub_category", "Item-lp_item_category"]]]},
                                                 "Property Setter"]
 
