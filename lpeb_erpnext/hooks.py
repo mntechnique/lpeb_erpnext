@@ -111,3 +111,7 @@ app_license = "GPLv3"
 # 	"frappe.desk.doctype.event.event.get_events": "lpeb_erpnext.event.get_events"
 # }
 
+fixtures = [{"dt":"Custom Field", "filters": [["name", "in",
+                                                ["Item Item-lp_item_sub_category", "Item Item-lp_item_category"]]]},
+                                                "Property Setter"]
+
