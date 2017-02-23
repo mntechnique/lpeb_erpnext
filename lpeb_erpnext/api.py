@@ -81,7 +81,7 @@ def make_actual_bom(boq, project, item, children):
     try:
         b.save()
         frappe.db.commit()
-        return "BOM {0} created for item '{1}'".format(b.name, b.item) 
+        return "BOM '{0}' created for item '{1}'".format(b.name, b.item) 
     except Exception as e:
         frappe.db.rollback()
         return ""
