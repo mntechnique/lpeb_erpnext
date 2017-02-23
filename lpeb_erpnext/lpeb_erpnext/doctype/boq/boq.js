@@ -7,7 +7,7 @@ frappe.ui.form.on('BOQ', {
         frappe.call({
             method: "lpeb_erpnext.api.make_bom_for_item",
             args: {
-                "item": cur_frm.doc.items[0]["item"],
+                "item": cur_frm.doc.items,
                 "boq": cur_frm.doc.name
             },
             callback: function(r) {
