@@ -77,9 +77,11 @@ app_license = "GPLv3"
 # 		"on_trash": "method"
 #	}
 # }
-
-# Scheduled Tasks
-# ---------------
+doc_events = {
+    "Project": {
+        "on_save": "lpeb_erpnext.api.activate_deactivate_bom",
+    }
+}
 
 # scheduler_events = {
 # 	"all": [
@@ -111,7 +113,7 @@ app_license = "GPLv3"
 # 	"frappe.desk.doctype.event.event.get_events": "lpeb_erpnext.event.get_events"
 # }
 
-fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client","BOQ-Client"]]]},
+fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client"]]]},
             {"dt":"Custom Field", "filters": [["name", "in",
                                                 ["Item-lp_item_sub_category", "Item-lp_item_category"]]]},
                                                 "Property Setter"]
