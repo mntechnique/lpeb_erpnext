@@ -39,9 +39,21 @@ def make_actual_bom(boq, project, item, children):
         b.save()
         frappe.db.commit()
         return "BOM '{0}' created for item '{1}'".format(b.name, b.item)
+
     except Exception as e:
         frappe.db.rollback()
         return ""
+
+
+def update_child_bom_links(project):
+    boms = frappe.get_all("BOM", filters={"project": project}, fields=["name"])
+    for bom in boms:
+        bom_items = frappe.get_all("BOM Item", filters={"parent": bom.name},fields=["*"])
+        for item in bom_items:
+            bom_id = frappe.db.get_value("BOM", filters={"item": item.name}, fieldname = "name")
+            if bom_id:
+                frappe.db.set_value("BOM Item", {"item_code": item.item_code,"parent":bom.name}, "bom_no", bom_id)
+                frappe.db.commit()
 
 
 
