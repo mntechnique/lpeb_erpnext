@@ -28,5 +28,7 @@ frappe.ui.form.on('BOQ', {
     }
 });
 
+cur_frm.add_fetch("item","stock_uom","uom");
+
 
 
