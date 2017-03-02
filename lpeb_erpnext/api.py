@@ -2,7 +2,7 @@ import frappe
 import json
 from frappe.utils import get_url
 from frappe import _
-
+from erpnext.controllers.queries import get_filters_cond
 
 @frappe.whitelist()
 def make_boms(boq, project):
@@ -80,26 +80,23 @@ def activate_deactivate_bom(self, method):
 
 @frappe.whitelist()
 def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
-        # for x in xrange(1,10):
-        #     print filters
-            
-        # return frappe.db.sql("""select A.item_code, B.item_group 
-        #     from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name;
-        #     """,as_dict=1)
+    # return frappe.db.sql("""select A.item_code, B.item_group 
+    #     from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name;
+    #     """,as_dict=1)
 
-    return frappe.db.sql("""select A.item_code, B.item_group 
-            from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name inner join `tabBOM` as C on A.parent = C.name 
-            where C.project = '{project_name}' and
-            B.item_group = '{item_group}' 
-            and (A.item_code like %(txt)s)
+    conditions = []
+    return frappe.db.sql("""select A.item, B.item_group 
+            from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name 
+            where C.project = '{project_name}' 
+            {fcond} and (A.item like %(txt)s)
         order by
-            if(locate(%(_txt)s, A.item_code), locate(%(_txt)s, A.item_code), 99999),
+            if(locate(%(_txt)s, A.item), locate(%(_txt)s, A.item), 99999),
             A.idx desc,
-            A.item_code
+            A.item
         limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
             'project_name': filters.get("project_name"),
-            'item_group': filters.get("item_group")
+            'fcond': get_filters_cond(doctype, filters, conditions)
         }), {
             'txt': "%%%s%%" % txt,
             '_txt': txt.replace("%", ""),
