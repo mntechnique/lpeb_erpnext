@@ -76,3 +76,33 @@ def activate_deactivate_bom(self, method):
             frappe.db.set_value("BOM", i.name, "is_active", 0)
 
         frappe.db.commit()
+
+
+@frappe.whitelist()
+def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
+        # for x in xrange(1,10):
+        #     print filters
+            
+        # return frappe.db.sql("""select A.item_code, B.item_group 
+        #     from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name;
+        #     """,as_dict=1)
+
+    return frappe.db.sql("""select A.item_code, B.item_group 
+            from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name inner join `tabBOM` as C on A.parent = C.name 
+            where C.project = '{project_name}' and
+            B.item_group = '{item_group}' 
+            and (A.item_code like %(txt)s)
+        order by
+            if(locate(%(_txt)s, A.item_code), locate(%(_txt)s, A.item_code), 99999),
+            A.idx desc,
+            A.item_code
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'project_name': filters.get("project_name"),
+            'item_group': filters.get("item_group")
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len
+        })
