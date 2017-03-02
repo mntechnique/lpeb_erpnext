@@ -79,7 +79,7 @@ app_license = "GPLv3"
 # }
 doc_events = {
     "Project": {
-        "on_save": "lpeb_erpnext.api.activate_deactivate_bom",
+        "on_update": "lpeb_erpnext.api.activate_deactivate_bom",
     }
 }
 
@@ -116,5 +116,7 @@ doc_events = {
 fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client"]]]},
             {"dt":"Custom Field", "filters": [["name", "in",
                                                 ["Item-lp_item_sub_category", "Item-lp_item_category"]]]},
+{"dt": "Print Format", "filters": [["name", "in", 
+												["Dispatch Order"]]]},
                                                 "Property Setter"]
 

@@ -56,8 +56,6 @@ def update_child_bom_links(project):
                 frappe.db.commit()
 
 
-
-
 def activate_deactivate_bom(self, method):
     project_boqs = frappe.get_all("BOQ", fields=["*"], filters={"project": self.name})
     boq_boms = frappe.get_all("BOM", fields=["*"], filters={"project": self.name})
