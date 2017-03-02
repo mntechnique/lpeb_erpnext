@@ -25,8 +25,27 @@ frappe.ui.form.on('BOQ', {
                 ]
             }
         });
+    },
+
+    validate: function(frm){
+        frappe.call({
+            method:"check_active_boq",
+            doc:frm.doc,
+            callback: function(r) {
+            }
+        });
     }
+
 });
+/*
+frappe.ui.form.on("BOQ Item", "onload", function(frm) {
+    frappe.call({
+        method:"lpeb_erpnext.lpeb_erpnext.doctype.boq.boq.check_active_boq",
+        args: {
+            "project": frm.doc.project,
+        },
+});
+*/
 
 /*auto fetch UOM for Item*/
 cur_frm.add_fetch("item","stock_uom","uom");
