@@ -50,9 +50,9 @@ def update_child_bom_links(project):
     for bom in boms:
         bom_items = frappe.get_all("BOM Item", filters={"parent": bom.name},fields=["*"])
         for item in bom_items:
-            bom_id = frappe.db.get_value("BOM", filters={"item": item.name}, fieldname = "name")
+            bom_id = frappe.db.get_value("BOM", filters={"item": item.item_code}, fieldname = "name")
             if bom_id:
-                frappe.db.set_value("BOM Item", {"item_code": item.item_code,"parent":bom.name}, "bom_no", bom_id)
+                frappe.db.set_value("BOM Item", "item_code" ,item.item_code, "bom_no", bom_id)
                 frappe.db.commit()
 
 

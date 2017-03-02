@@ -79,7 +79,7 @@ app_license = "GPLv3"
 # }
 doc_events = {
     "Project": {
-        "on_save": "lpeb_erpnext.api.activate_deactivate_bom",
+        "on_update": "lpeb_erpnext.api.activate_deactivate_bom",
     }
 }
 
