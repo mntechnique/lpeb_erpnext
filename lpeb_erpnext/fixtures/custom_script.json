@@ -2,6 +2,15 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Script", 
+  "dt": "Sales Order", 
+  "modified": "2017-03-03 15:09:25.865255", 
+  "name": "Sales Order-Client", 
+  "script": "frappe.ui.form.on(\"Sales Order\", {\n\trefresh: function(frm) {\n\t\tfrm.set_query(\"item_code\", \"items\", function(doc, cdt, cdn) {\n\t\t    return {\n\t\t        filters: { \"item_group\": \"Products\" }\n\t\t    };\n\t\t});\n\t\tadd_custom_buttons(frm);\n\t},\n});\n\n\nfunction add_custom_buttons(frm) {\n\tfrm.add_custom_button(__('Dispatch Order'), function(){\n\t\tfrappe.call({\n\t\t\tmethod: \"lpeb_erpnext.api.make_dispatch_order_from_so\",\n\t\t\targs: {\"so\": frm.doc.name},\n\t\t\tfreeze: true,\n\t\t\tfreeze_message: __(\"Creating Dispatch Order\"),\n\t\t\tcallback: function(r){\n\t\t\t\tif(!r.exc) {\n\t\t\t\t\tfrappe.msgprint(__(r.message));\n\t\t\t\t} else {\n\t\t\t\t\tfrappe.msgprint(__(\"Dispatch Order could not be created. <br /> \" + r.exc));\n\t\t\t\t}\n\t\t\t}\n\t\t});\n\t}, __(\"Make\"));\n}", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
   "dt": "Item", 
   "modified": "2017-02-16 10:12:18.654125", 
   "name": "Item-Client", 

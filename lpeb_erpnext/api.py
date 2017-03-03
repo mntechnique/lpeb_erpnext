@@ -115,3 +115,56 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
             'start': start,
             'page_len': page_len
         })
+
+
+@frappe.whitelist()
+def make_dispatch_order_from_so(so):
+    if not so:
+        return {"exc": "Invalid Sales Order ID"}
+
+    oso = frappe.get_doc("Sales Order", so)
+
+    odo = frappe.new_doc("LPEB Dispatch Order")
+    odo.sales_order = so
+    odo.project = oso.project
+
+    for soi in oso.items:
+        odo.append("office_items", {
+            "item_code": soi.item_code
+        })    
+
+    try:
+        odo.save()
+        frappe.db.commit()
+        return "Dispatch Order #{0} created successfully".format(odo.name) 
+    except Exception as e:
+        raise
+
+@frappe.whitelist()
+def make_dn_from_dispatch_order(do):
+    if not do:
+        return {"exc": "Invalid Sales Order ID"}
+
+    odo = frappe.get_doc("LPEB Dispatch Order", do)
+
+    odn = frappe.new_doc("Delivery Note")
+    odn.customer =  frappe.db.get_value("Sales Order", odo.sales_order, "customer")
+
+    for doi in odo.shop_floor_items:
+
+        odoi = frappe.get_doc("Item", {"item_code": doi.item_code})
+
+        odn.append("items", {
+            "item_code": doi.item_code,
+            "item_name": odoi.item_name,
+            "description": odoi.description,
+            "qty": frappe.db.get_value("LPEB Dispatch Order Shop Floor Item", filters={"parent": do, "item_code": doi.item_code}, fieldname="qty")
+        })
+
+    try:
+        odn.save()
+        frappe.db.commit()
+        return "Delivery Note #{0} created successfully.".format(odn.name)
+    except Exception as e:
+        raise
+

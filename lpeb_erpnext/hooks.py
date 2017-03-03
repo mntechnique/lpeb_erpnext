@@ -113,7 +113,7 @@ doc_events = {
 # 	"frappe.desk.doctype.event.event.get_events": "lpeb_erpnext.event.get_events"
 # }
 
-fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client"]]]},
+fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client", "Sales Order-Client"]]]},
             {"dt":"Custom Field", "filters": [["name", "in",
                                                 ["Item-lp_item_sub_category", "Item-lp_item_category"]]]},
 {"dt": "Print Format", "filters": [["name", "in", 
