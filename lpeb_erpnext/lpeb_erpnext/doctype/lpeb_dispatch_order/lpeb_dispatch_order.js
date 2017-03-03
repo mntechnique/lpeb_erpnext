@@ -5,21 +5,23 @@ frappe.ui.form.on('LPEB Dispatch Order', {
 	refresh: function(frm) {
         cur_frm.set_query("item_code", "office_items", function() {
             return {
-            	query: "",
-                filters: [
-                    ["Item", "item_group", "=", "Products"]
-                ]
+            	query: "lpeb_erpnext.api.bomitems_for_project",
+                filters: {                    
+                    "item_group": "Products",
+                    "project_name": cur_frm.doc.project
+                }
             }
-    
         });
         cur_frm.set_query("item_code", "shop_floor_items", function() {
+            // filter_list = ["Raw Materials","Sub Assemblies","Consumables"]
             return {
-            	query: "",
-                filters: [
-                    ["Item", "item_group", "!=", "Products"]
-                ]
+            	query: "lpeb_erpnext.api.bomitems_for_project",
+                filters: {
+                    // "item_group": "'Raw Materials', 'Sub Assemblies', 'Consumables'"
+                    "item_group": "Raw Material",
+                    "project_name": cur_frm.doc.project
+                }
             }
-    
         });
     }
 });

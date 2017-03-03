@@ -2,7 +2,7 @@ import frappe
 import json
 from frappe.utils import get_url
 from frappe import _
-
+from erpnext.controllers.queries import get_filters_cond
 
 @frappe.whitelist()
 def make_boms(boq, project):
@@ -74,3 +74,30 @@ def activate_deactivate_bom(self, method):
             frappe.db.set_value("BOM", i.name, "is_active", 0)
 
         frappe.db.commit()
+
+
+@frappe.whitelist()
+def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
+    # return frappe.db.sql("""select A.item_code, B.item_group 
+    #     from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name;
+    #     """,as_dict=1)
+
+    conditions = []
+    return frappe.db.sql("""select A.item, B.item_group 
+            from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name 
+            where C.project = '{project_name}' 
+            {fcond} and (A.item like %(txt)s)
+        order by
+            if(locate(%(_txt)s, A.item), locate(%(_txt)s, A.item), 99999),
+            A.idx desc,
+            A.item
+        limit %(start)s, %(page_len)s""".format(**{
+            'key': searchfield,
+            'project_name': filters.get("project_name"),
+            'fcond': get_filters_cond(doctype, filters, conditions)
+        }), {
+            'txt': "%%%s%%" % txt,
+            '_txt': txt.replace("%", ""),
+            'start': start,
+            'page_len': page_len
+        })

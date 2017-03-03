@@ -11,7 +11,7 @@ class BOQ(Document):
     def validate(self):
         self.check_active_boq()
         self.check_duplicate_items()
-        
+
     def check_active_boq(self):
         if self.project:
             boq = frappe.get_all("BOQ", filters=[["project", "=", self.project], ["is_active", "=", 1], ["name", "!=", self.name]])
