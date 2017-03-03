@@ -26,7 +26,6 @@ frappe.ui.form.on('BOQ', {
             }
         });
     },
-
     validate: function(frm){
         frappe.call({
             method:"check_active_boq",
