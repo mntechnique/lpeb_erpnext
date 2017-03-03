@@ -23,9 +23,6 @@ class BOQ(Document):
 
     def check_duplicate_item(self):
         boq_items = frappe.get_all("BOQ Item",filters={"parent": self.name}, fields=["item, parent_item"])
-        item = []
-        for i in boq_items:
-            item =i
 
 
 
