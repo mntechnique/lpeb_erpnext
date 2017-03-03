@@ -25,6 +25,15 @@ frappe.ui.form.on('LPEB Dispatch Order', {
         if (!frm.doc.__islocal) {
             add_custom_buttons(frm);
         }
+        cur_frm.set_query("item_code", "additional_items", function() {
+            return {
+                query: "lpeb_erpnext.api.bomitems_for_project",
+                filters: {                   
+                    "item_group": "Consumable",
+                    "project_name": cur_frm.doc.project
+                }
+            }
+        });
     }, 
 });
 
