@@ -13,7 +13,6 @@ frappe.ui.form.on('LPEB Dispatch Order', {
             }
         });
         cur_frm.set_query("item_code", "shop_floor_items", function() {
-            // filter_list = ["Raw Materials","Sub Assemblies","Consumables"]
             return {
             	query: "lpeb_erpnext.api.bomitems_for_project",
                 filters: {
@@ -34,9 +33,21 @@ frappe.ui.form.on('LPEB Dispatch Order', {
                 }
             }
         });
-    }, 
+    },
 });
 
+frappe.ui.form.on("LPEB Dispatch Order Office Item", "item_code", function(doc, cdt, cdn) {
+    // refresh: function(frm) {
+    //      // for(i=0;i<items.length;i++) 
+            // iterate the for loop for boq item tables length 
+            frappe.get_value("BOQ Item", "item", function(r) {
+                if(r) {
+                    console.log("r= "+ r)
+                    set_shop_floor_items(r);
+                }
+            });  
+    console.log("childfield called");
+});
 
 cur_frm.add_fetch("item_code", "stock_uom", "uom");
 
@@ -56,4 +67,8 @@ function add_custom_buttons(frm) {
             }
         });
     }, __("Make"));
+}
+
+function set_shop_floor_items(r){
+    cur_frm.set_value("item_code", "shop_floor_items", r.item_code);    
 }
