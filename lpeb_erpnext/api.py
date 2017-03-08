@@ -4,45 +4,6 @@ from frappe.utils import get_url
 from frappe import _
 from erpnext.controllers.queries import get_filters_cond
 
-@frappe.whitelist()
-def make_boms(boq, project):
-    items = frappe.get_all("BOQ Item", filters={"parent": boq }, fields=["*"], order_by="idx")
-    items = [i["item"] for i in items]
-
-    msgs = []
-
-    for item in items:
-        children = frappe.get_all("BOQ Item", filters={"parent":boq, "parent_item": item}, fields=["*"])
-        if len(children) > 0:
-
-            if len(frappe.get_all("BOM", filters={"item": item, "project": project})) == 0:
-                msg = make_actual_bom(boq, project, item, children)
-                msgs.append(msg)
-            else:
-                msgs.append("BOM already created for item '{0}' under project '{1}'".format(item, project))
-
-    return "<br>".join(msgs)
-
-def make_actual_bom(boq, project, item, children):
-    b = frappe.new_doc("BOM")
-    b.project = project
-    b.item = item
-    b.qty = frappe.db.get_value("BOQ Item",filters={"parent": boq, "item": item})
-
-    for child in children:
-        b.append("items", {
-            "item_code": child.get("item"),
-            "qty": child.qty
-        })
-
-    try:
-        b.save()
-        frappe.db.commit()
-        return "BOM '{0}' created for item '{1}'".format(b.name, b.item)
-
-    except Exception as e:
-        frappe.db.rollback()
-        return ""
 
 
 def update_child_bom_links(project):
@@ -82,10 +43,10 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
         item_group_clause = filters.get("item_group")
 
         if not item_group_clause:
-            return ""        
+            return ""
 
         out = ""
-        
+
         if type(item_group_clause) == list:
             item_groups = item_group_clause[1]
             out = " and B.item_group in ({0})".format(",".join("'{0}'".format(g) for g in item_groups))
@@ -95,9 +56,9 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
         return out
 
     conditions = []
-    return frappe.db.sql("""select distinct A.item, B.item_group 
-            from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name 
-            where C.project = '{project_name}' 
+    return frappe.db.sql("""select distinct A.item, B.item_group
+            from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name
+            where C.project = '{project_name}'
             {item_group_clause} and (A.item like %(txt)s)
         order by
             if(locate(%(_txt)s, A.item), locate(%(_txt)s, A.item), 99999),
@@ -129,12 +90,12 @@ def make_dispatch_order_from_so(so):
     for soi in oso.items:
         odo.append("office_items", {
             "item_code": soi.item_code
-        })    
+        })
 
     try:
         odo.save()
         frappe.db.commit()
-        return "Dispatch Order #{0} created successfully".format(odo.name) 
+        return "Dispatch Order #{0} created successfully".format(odo.name)
     except Exception as e:
         raise
 
