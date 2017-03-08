@@ -37,6 +37,7 @@ def make_actual_bom(boq, project, item, children):
 
     try:
         b.save()
+        b.submit()
         frappe.db.commit()
         return "BOM '{0}' created for item '{1}'".format(b.name, b.item)
 
@@ -82,10 +83,10 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
         item_group_clause = filters.get("item_group")
 
         if not item_group_clause:
-            return ""        
+            return ""
 
         out = ""
-        
+
         if type(item_group_clause) == list:
             item_groups = item_group_clause[1]
             out = " and B.item_group in ({0})".format(",".join("'{0}'".format(g) for g in item_groups))
@@ -97,9 +98,9 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
         return out
 
     conditions = []
-    return frappe.db.sql("""select distinct A.item, B.item_group 
-            from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name 
-            where C.project = '{project_name}' 
+    return frappe.db.sql("""select distinct A.item, B.item_group
+            from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name
+            where C.project = '{project_name}'
             {item_group_clause} and (A.item like %(txt)s)
         order by
             if(locate(%(_txt)s, A.item), locate(%(_txt)s, A.item), 99999),
@@ -131,12 +132,12 @@ def make_dispatch_order_from_so(so):
     for soi in oso.items:
         odo.append("office_items", {
             "item_code": soi.item_code
-        })    
+        })
 
     try:
         odo.save()
         frappe.db.commit()
-        return "Dispatch Order #{0} created successfully".format(odo.name) 
+        return "Dispatch Order #{0} created successfully".format(odo.name)
     except Exception as e:
         raise
 
