@@ -92,8 +92,6 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
         else:
             out = " and B.item_group = '{0}'".format(item_group_clause)
 
-        print "Output", out
-
         return out
 
     conditions = []
@@ -168,3 +166,30 @@ def make_dn_from_dispatch_order(do):
     except Exception as e:
         raise
 
+@frappe.whitelist()
+def get_child_items_from_bom(item_code, project):
+    """
+        For supplied item_code, get children from BOM of supplied project.
+    """
+    project_bom = frappe.get_all("BOM", filters={"project": project, "item": item_code})
+    project_bom_children = frappe.get_all("BOM Item", filters={"parent": project_bom[0].name}, fields=["*"])
+
+    dispatch_orders_for_project = frappe.get_all("LPEB Dispatch Order", filters={"project": project})
+    dispatch_order_names = [do["name"] for do in dispatch_orders_for_project]
+    do_shop_floor_items = frappe.get_all("LPEB Dispatch Order Shop Floor Item", filters=[["parent", "in", dispatch_order_names]], fields=["*"])
+
+    out_items = []
+
+    for bom_child in project_bom_children:
+        dispatched_qty = 0.0
+        for sfi in do_shop_floor_items:
+            if sfi.item_code == bom_child.item_code:
+                dispatched_qty += sfi.qty
+
+        out_items.append({
+            "item_code": bom_child.item_code,
+            "qty": bom_child.qty - dispatched_qty,
+            "uom": bom_child.stock_uom
+        })
+
+    return out_items

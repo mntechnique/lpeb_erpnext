@@ -36,20 +36,49 @@ frappe.ui.form.on('LPEB Dispatch Order', {
     },
 });
 
-frappe.ui.form.on("LPEB Dispatch Order Office Item", "item_code", function(doc, cdt, cdn) {
-    // refresh: function(frm) {
-    //      // for(i=0;i<items.length;i++) 
-            // iterate the for loop for boq item tables length 
-            frappe.get_value("BOQ Item", "item", function(r) {
-                if(r) {
-                    console.log("r= "+ r)
-                    set_shop_floor_items(r);
+frappe.ui.form.on("LPEB Dispatch Order Office Item", {
+
+    item_code: function(doc, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        if (row["item_code"]) {
+            frappe.call({
+                method: "lpeb_erpnext.api.get_child_items_from_bom",
+                args: {
+                    "item_code": row["item_code"],
+                    "project": cur_frm.doc.project
+                },
+                callback: function(r) {
+                    $.each(r.message, function(i, d) {
+                        var existing_items = [];
+                        if (cur_frm.doc.shop_floor_items) {
+                            existing_items = cur_frm.doc.shop_floor_items.filter(function(x) { return x["item_code"] == d["item_code"]});
+                        }
+
+                        if (existing_items.length == 0) {
+                            var row = frappe.model.add_child(cur_frm.doc, "LPEB Dispatch Order Shop Floor Item", "shop_floor_items");
+                            row.item_code = d.item_code;
+                            row.qty = d.qty;
+                            row.uom = d.uom;
+                            row["max_qty"] = d.qty;
+                        }
+                    });
+                    refresh_field("shop_floor_items");
                 }
-            });  
-    console.log("childfield called");
+            });
+        }
+    },
+    qty: function(doc, cdt, cdn) {
+        var row = locals[cdt][cdn];
+
+        if (row["qty"] > row["max_qty"]) {
+            frappe.msgprint("Qty cannot exceed " + row["max_qty"])
+            row["qty"] = 0
+        }
+    }
+
 });
 
-cur_frm.add_fetch("item_code", "stock_uom", "uom");
+
 
 function add_custom_buttons(frm) {
     frm.add_custom_button(__('Delivery Note'), function(){
@@ -72,3 +101,5 @@ function add_custom_buttons(frm) {
 function set_shop_floor_items(r){
     cur_frm.set_value("item_code", "shop_floor_items", r.item_code);    
 }
+
+cur_frm.add_fetch("item_code", "stock_uom", "uom");
