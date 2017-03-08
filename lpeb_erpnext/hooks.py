@@ -116,5 +116,7 @@ doc_events = {
 fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client"]]]},
             {"dt":"Custom Field", "filters": [["name", "in",
                                                 ["Item-lp_item_sub_category", "Item-lp_item_category"]]]},
+{"dt": "Print Format", "filters": [["name", "in", 
+												["Dispatch Order"]]]},
                                                 "Property Setter"]
 

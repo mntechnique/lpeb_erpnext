@@ -56,8 +56,6 @@ def update_child_bom_links(project):
                 frappe.db.commit()
 
 
-
-
 def activate_deactivate_bom(self, method):
     project_boqs = frappe.get_all("BOQ", fields=["*"], filters={"project": self.name})
     boq_boms = frappe.get_all("BOM", fields=["*"], filters={"project": self.name})
@@ -80,15 +78,29 @@ def activate_deactivate_bom(self, method):
 
 @frappe.whitelist()
 def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
-    # return frappe.db.sql("""select A.item_code, B.item_group 
-    #     from `tabBOM Item` as A inner join tabItem as B on A.item_code = B.name;
-    #     """,as_dict=1)
+    def get_item_group_clause(filters):
+        item_group_clause = filters.get("item_group")
+
+        if not item_group_clause:
+            return ""        
+
+        out = ""
+        
+        if type(item_group_clause) == list:
+            item_groups = item_group_clause[1]
+            out = " and B.item_group in ({0})".format(",".join("'{0}'".format(g) for g in item_groups))
+        else:
+            out = " and B.item_group = '{0}'".format(item_group_clause)
+
+        print "Output", out
+
+        return out
 
     conditions = []
-    return frappe.db.sql("""select A.item, B.item_group 
+    return frappe.db.sql("""select distinct A.item, B.item_group 
             from `tabBOQ Item` as A inner join tabItem as B on A.item = B.name inner join `tabBOQ` as C on A.parent = C.name 
             where C.project = '{project_name}' 
-            {fcond} and (A.item like %(txt)s)
+            {item_group_clause} and (A.item like %(txt)s)
         order by
             if(locate(%(_txt)s, A.item), locate(%(_txt)s, A.item), 99999),
             A.idx desc,
@@ -96,7 +108,7 @@ def bomitems_for_project(doctype, txt, searchfield, start, page_len, filters):
         limit %(start)s, %(page_len)s""".format(**{
             'key': searchfield,
             'project_name': filters.get("project_name"),
-            'fcond': get_filters_cond(doctype, filters, conditions)
+            'item_group_clause': get_item_group_clause(filters)
         }), {
             'txt': "%%%s%%" % txt,
             '_txt': txt.replace("%", ""),

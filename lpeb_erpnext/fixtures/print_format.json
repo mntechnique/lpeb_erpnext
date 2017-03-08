@@ -1,0 +1,22 @@
+[
+ {
+  "align_labels_left": 0, 
+  "css": null, 
+  "custom_format": 1, 
+  "disabled": 0, 
+  "doc_type": "LPEB Dispatch Order", 
+  "docstatus": 0, 
+  "doctype": "Print Format", 
+  "font": "Default", 
+  "format_data": null, 
+  "html": "\t<div class=\"row\">\n\t\t<div class=\"col-xs-12 text-center\">\n\t\t\tCompany Name\n\t\t\tAddress\n\t\t</div>\n\t</div>\n\t<hr>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-6\">\n\t\t\t<table>\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\tDispatch No:\n\t\t\t\t\t</td>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t1234\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\tORI No:\t\n\t\t\t\t\t</td>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t123123\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n\t\t<div class=\"col-xs-6\">\n\t\t\t<table>\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\tDispatch Date\n\t\t\t\t\t</td>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t123123\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\tProject Code\t\n\t\t\t\t\t</td>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t123123\n\t\t\t\t\t</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n\t</div>\n\t<hr>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-6\">\n\t\t\tBill To,\n\t\t\tBILLING ADDRESS <br>\n\t\t\tLINE1\n\t\t\tLINE2 <br>\n\t\t\tLINE3 <br>\n\t\t</div>\n\t\t<div class=\"col-xs-6\">\n\t\t\tShip To,\n\t\t\tSHIPPING ADDRESS <br>\n\t\t\tLINE1\n\t\t\tLINE2 <br>\n\t\t\tLINE3 <br>\n\t\t</div>\n\t</div>\n\t<hr>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-12\">\n\t\t\t<table>\n\t\t\t\t<tr>\n\t\t\t\t\t<th width=\"3%\">Sr. No</th>\n\t\t\t\t\t<th width=\"47%\">Material Description</th>\n\t\t\t\t\t<th width=\"20%\">Percentage</th>\n\t\t\t\t\t<th width=\"30%\">Remark</th>\n\t\t\t\t</tr>\n\t\t\t\t{% for i in doc.office_items %}\n\t\t\t\t\t{% set grouping_printed = 0 %}\n\t\t\t\t\t{% for j in doc.shop_floor_items %}\n\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t{% if grouping_printed == 0%}\n\t\t\t\t\t\t\t\t<td>{{i.item_code}}</td>\n\t\t\t\t\t\t\t\t<td>{{ 'material_desc' }}</td>\n\t\t\t\t\t\t\t\t<td>{{i.percentage}}</td>\n\t\t\t\t\t\t\t\t{% set grouping_printed = 1 %}\n\t\t\t\t\t\t\t{% else %}\n\t\t\t\t\t\t\t\t<td></td>\n\t\t\t\t\t\t\t\t<td></td>\n\t\t\t\t\t\t\t\t<td></td>\n\t\t\t\t\t\t\t{% endif %}\n\t\t\t\t\t\t\t<td>{{ j.item_code }}</td>\n\t\t\t\t\t\t</tr>\n\t\t\t\t\t{% endfor %}\n\t\t\t\t{% endfor%}\n\t\t\t</table>\n\t\t</div>\n\t</div>\n\t<hr>\n\t<div class=\"row text-center\">\n\t\t<div class=\"col-xs-4\" style=\"height: 35px; border: 1px\">\n\t\t\t<span class=\"text-center\">Ishan</span>\n\t\t\t<span class=\"text-center\">Printed by</span>\n\t\t</div>\n\t\t<div class=\"col-xs-4\" style=\"height: 35px;  border: 1px\">\n\t\t\t<span class=\"text-center\">Bhalchandra Hivarkar</span>\n\t\t\t<span class=\"text-center\">Prepared by</span>\n\t\t</div>\n\t\t<div class=\"col-xs-4\" style=\"height: 35px;  border: 1px\">\n\t\t\t<span class=\"text-center\">Authorized Signatory</span>\n\t\t</div>\n\t</div>\n\t\t", 
+  "line_breaks": 0, 
+  "modified": "2017-03-02 20:57:36.236572", 
+  "module": "LPEB ERPNext", 
+  "name": "Dispatch Order", 
+  "print_format_builder": 0, 
+  "print_format_type": "Server", 
+  "show_section_headings": 0, 
+  "standard": "No"
+ }
+]
