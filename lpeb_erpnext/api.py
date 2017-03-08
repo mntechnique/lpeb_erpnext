@@ -4,46 +4,6 @@ from frappe.utils import get_url
 from frappe import _
 from erpnext.controllers.queries import get_filters_cond
 
-@frappe.whitelist()
-def make_boms(boq, project):
-    items = frappe.get_all("BOQ Item", filters={"parent": boq }, fields=["*"], order_by="idx")
-    items = [i["item"] for i in items]
-
-    msgs = []
-
-    for item in items:
-        children = frappe.get_all("BOQ Item", filters={"parent":boq, "parent_item": item}, fields=["*"])
-        if len(children) > 0:
-
-            if len(frappe.get_all("BOM", filters={"item": item, "project": project})) == 0:
-                msg = make_actual_bom(boq, project, item, children)
-                msgs.append(msg)
-            else:
-                msgs.append("BOM already created for item '{0}' under project '{1}'".format(item, project))
-
-    return "<br>".join(msgs)
-
-def make_actual_bom(boq, project, item, children):
-    b = frappe.new_doc("BOM")
-    b.project = project
-    b.item = item
-    b.qty = frappe.db.get_value("BOQ Item",filters={"parent": boq, "item": item})
-
-    for child in children:
-        b.append("items", {
-            "item_code": child.get("item"),
-            "qty": child.qty
-        })
-
-    try:
-        b.save()
-        b.submit()
-        frappe.db.commit()
-        return "BOM '{0}' created for item '{1}'".format(b.name, b.item)
-
-    except Exception as e:
-        frappe.db.rollback()
-        return ""
 
 
 def update_child_bom_links(project):
