@@ -23,7 +23,7 @@ class LPEBDispatchOrder(Document):
 		for d in self.get('shop_floor_items'):
 			if d.item_code:
 				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
-					where item_code = %s and warehouse = %s""", (d.item_code, d_wh))
+					where item_code = '{item_code}' and warehouse = '{warehouse}';""".format(item_code=d.item_code, warehouse=d_wh))
 
-				if flt(actual_qty[0][0]) < d.qty:
+				if len(actual_qty) == 0 or flt(actual_qty[0][0]) < d.qty:
 					frappe.throw("No Stock in Dispatch Warehouse")
