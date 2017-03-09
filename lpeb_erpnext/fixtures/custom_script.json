@@ -12,9 +12,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Item", 
-  "modified": "2017-02-16 10:12:18.654125", 
+  "modified": "2017-03-09 20:49:59.711554", 
   "name": "Item-Client", 
-  "script": "frappe.ui.form.on(\"Item\", \"onload\", function(frm) {\n    cur_frm.set_query(\"item_group\", function() {\n    return {\n            \"filters\": {\n                \"is_group\": \"1\",\n\t\t\"parent_item_group\": \"All Item Groups\",\n            }\n        };\n    });\n});\n\n\n\nfrappe.ui.form.on(\"Item\", \"onload\", function(frm) {\n    cur_frm.set_query(\"lp_item_category\", function() {\n    return {\n            \"filters\": {\n                \"is_group\": \"1\",\n\t\t\"parent_item_group\": frm.doc.item_group,\n            }\n        };\n    });\n});\n\nfrappe.ui.form.on(\"Item\", \"onload\", function(frm) {\n    cur_frm.set_query(\"lp_item_sub_category\", function() {\n    return {\n            \"filters\": {\n                \"is_group\": \"0\",\n\t\t\"parent_item_group\": frm.doc.lp_item_category,\n            }\n        };\n    });\n});", 
+  "script": "", 
   "script_type": "Client"
  }
 ]
