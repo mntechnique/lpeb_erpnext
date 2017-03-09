@@ -4,7 +4,26 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import flt
 from frappe.model.document import Document
 
 class LPEBDispatchOrder(Document):
-	pass
+	def validate(self):
+		self.validate_actual_qty()
+
+	def validate_actual_qty(self):
+		dispatch_warehouses = frappe.get_doc("LPEB settings", "LPEB settings").dispatch_warehouses
+		d_wh = None
+		for wh in dispatch_warehouses:
+			d_wh = wh.warehouse if wh.company == frappe.defaults.get_defaults().get("company") else None
+	
+		if not d_wh:
+			frappe.throw("Please set Dispatch warehouse in LPEB Settings")
+
+		for d in self.get('shop_floor_items'):
+			if d.item_code:
+				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
+					where item_code = %s and warehouse = %s""", (d.item_code, d_wh))
+
+				if flt(actual_qty[0][0]) < d.qty:
+					frappe.throw("No Stock in Dispatch Warehouse")
