@@ -102,7 +102,7 @@ class BOQ(Document):
                         b_fg.append("items", {
                             "item_code": child.item,
                             "qty": child.qty,
-                            "bom_no": frappe.db.get_value("BOM", {"item": child.item}, "name")
+                            "bom_no": frappe.db.get_value("BOM", {"project": self.project, "item": child.item}, "name")
                         })
 
                     b_fg.save()
