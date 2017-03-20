@@ -80,6 +80,7 @@ app_license = "GPLv3"
 doc_events = {
     "Project": {
         "on_update": "lpeb_erpnext.api.activate_deactivate_bom",
+        "after_insert": "lpeb_erpnext.api.lpeb_project_after_insert"
     }
 }
 

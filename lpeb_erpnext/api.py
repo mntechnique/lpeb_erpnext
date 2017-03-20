@@ -154,3 +154,24 @@ def get_child_items_from_bom(item_code, project):
         })
 
     return out_items
+
+@frappe.whitelist()
+def lpeb_project_after_insert(self,method):
+    abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults()["company"],"abbr")
+    project_warehouse = frappe.new_doc("Warehouse")
+    project_warehouse.warehouse_name = self.name
+    project_warehouse.is_group = 1
+    project_warehouse.save()
+    frappe.db.commit()
+    
+    project_warehouse_wip = frappe.new_doc("Warehouse")
+    project_warehouse_wip.warehouse_name = self.name + " - WIP"
+    project_warehouse_wip.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
+    project_warehouse_wip.save()
+    frappe.db.commit()
+    
+    project_warehouse_fg = frappe.new_doc("Warehouse")
+    project_warehouse_fg.warehouse_name = self.name + " - FG"        
+    project_warehouse_fg.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
+    project_warehouse_fg.save()
+    frappe.db.commit()

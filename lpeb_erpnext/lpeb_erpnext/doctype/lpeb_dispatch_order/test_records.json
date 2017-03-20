@@ -1,0 +1,19 @@
+[
+ {
+  "additional_items": [], 
+  "amended_from": null, 
+  "docstatus": 0, 
+  "doctype": "LPEB Dispatch Order", 
+  "modified": "2017-03-07 18:36:12.743359", 
+  "name": "Test-LPDO-00001", 
+  "office_items": [], 
+  "project": "demo_project", 
+  "shop_floor_items": [
+   {
+    "item_code": "012", 
+    "qty": 100.0, 
+    "uom": "Nos"
+   }
+  ]
+ }
+]
