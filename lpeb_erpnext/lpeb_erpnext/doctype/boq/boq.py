@@ -56,9 +56,13 @@ class BOQ(Document):
 					print "BOM for ", sa.item, "project: ", self.project
 
 					for child in children:
+
+						print "BOM Item for ", child
+
 						b_sa.append("items", {
 							"item_code": child.item,
 							"qty": child.qty,
+							"stock_uom": child.uom
 						})
 					
 					b_sa.save()
