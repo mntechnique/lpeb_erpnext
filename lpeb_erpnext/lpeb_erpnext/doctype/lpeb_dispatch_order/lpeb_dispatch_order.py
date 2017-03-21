@@ -8,7 +8,7 @@ from frappe.utils import flt
 from frappe.model.document import Document
 
 class LPEBDispatchOrder(Document):
-	def validate(self):
+	def before_submit(self):
 		self.validate_actual_qty()
 
 	def validate_actual_qty(self):
