@@ -194,6 +194,7 @@ def lpeb_project_after_insert(self,method):
 @frappe.whitelist()
 def lpeb_bom_autoname(self, method):
     if self.project:
-        self.name = "BOM-" + self.project + "-" + self.item
+        self.name = self.name.replace("BOM", "BOM-" + self.project)
+   
         
 
