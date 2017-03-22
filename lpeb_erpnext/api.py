@@ -189,3 +189,12 @@ def lpeb_project_after_insert(self,method):
     project_warehouse_fg.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
     project_warehouse_fg.save()
     frappe.db.commit()
+
+
+@frappe.whitelist()
+def lpeb_bom_autoname(self, method):
+    if self.project:
+        self.name = self.name.replace("BOM", "BOM-" + self.project)
+   
+        
+
