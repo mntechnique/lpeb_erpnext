@@ -6,7 +6,7 @@ frappe.ui.form.on('LPEB Dispatch Order', {
         cur_frm.set_query("item_code", "office_items", function() {
             return {
             	query: "lpeb_erpnext.api.bomitems_for_project",
-                filters: {                   
+                filters: {
                     "item_group": "Products",
                     "project_name": cur_frm.doc.project
                 }
@@ -27,7 +27,7 @@ frappe.ui.form.on('LPEB Dispatch Order', {
         cur_frm.set_query("item_code", "additional_items", function() {
             return {
                 query: "lpeb_erpnext.api.bomitems_for_project",
-                filters: {                   
+                filters: {
                     "item_group": "Consumable",
                     "project_name": cur_frm.doc.project
                 }
@@ -59,6 +59,7 @@ frappe.ui.form.on("LPEB Dispatch Order Office Item", {
                             row.item_code = d.item_code;
                             row.qty = d.qty;
                             row.uom = d.uom;
+                            row.warehouse = d.warehouse;
                             row["max_qty"] = d.qty;
                         }
                     });
@@ -77,6 +78,7 @@ frappe.ui.form.on("LPEB Dispatch Order Office Item", {
     }
 
 });
+
 
 
 
@@ -99,7 +101,7 @@ function add_custom_buttons(frm) {
 }
 
 function set_shop_floor_items(r){
-    cur_frm.set_value("item_code", "shop_floor_items", r.item_code);    
+    cur_frm.set_value("item_code", "shop_floor_items", r.item_code);
 }
 
 cur_frm.add_fetch("item_code", "stock_uom", "uom");

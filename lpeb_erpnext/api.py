@@ -128,7 +128,7 @@ def make_dn_from_dispatch_order(do):
         raise
 
 @frappe.whitelist()
-def get_child_items_from_bom(item_code, project):
+def get_child_items_from_bom(item_code=None, project=None):
     """
         For supplied item_code, get children from BOM of supplied project.
     """
@@ -147,10 +147,24 @@ def get_child_items_from_bom(item_code, project):
             if sfi.item_code == bom_child.item_code:
                 dispatched_qty += sfi.qty
 
+        item_group = frappe.db.get_value("Item",{"item_code": bom_child.item_code}, fieldname="item_group" )
+        abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
+        warehouse = ""
+        if item_group == "Raw Materials":
+            warehouse = frappe.db.get_value("Warehouse", filters={
+                        "warehouse_name": _("Raw Materials"),
+                        "company": frappe.defaults.get_defaults().company
+                    },fieldname="name")
+        elif item_group == "Sub Assemblies":
+             warehouse = frappe.db.get_value("Warehouse", filters={
+                        "warehouse_name": _("Finished Goods"),
+                        "company": frappe.defaults.get_defaults().company
+                    },fieldname ="name")
         out_items.append({
             "item_code": bom_child.item_code,
             "qty": bom_child.qty - dispatched_qty,
-            "uom": bom_child.stock_uom
+            "uom": bom_child.stock_uom,
+            "warehouse": warehouse
         })
 
     return out_items
@@ -163,15 +177,15 @@ def lpeb_project_after_insert(self,method):
     project_warehouse.is_group = 1
     project_warehouse.save()
     frappe.db.commit()
-    
+
     project_warehouse_wip = frappe.new_doc("Warehouse")
     project_warehouse_wip.warehouse_name = self.name + " - WIP"
     project_warehouse_wip.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
     project_warehouse_wip.save()
     frappe.db.commit()
-    
+
     project_warehouse_fg = frappe.new_doc("Warehouse")
-    project_warehouse_fg.warehouse_name = self.name + " - FG"        
+    project_warehouse_fg.warehouse_name = self.name + " - FG"
     project_warehouse_fg.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
     project_warehouse_fg.save()
     frappe.db.commit()
