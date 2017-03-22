@@ -2,10 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('LPEB Dispatch Order', {
-	refresh: function(frm) {
+    refresh: function(frm) {
         cur_frm.set_query("item_code", "office_items", function() {
             return {
-            	query: "lpeb_erpnext.api.bomitems_for_project",
+                query: "lpeb_erpnext.api.bomitems_for_project",
                 filters: {
                     "item_group": "Products",
                     "project_name": cur_frm.doc.project
@@ -14,7 +14,7 @@ frappe.ui.form.on('LPEB Dispatch Order', {
         });
         cur_frm.set_query("item_code", "shop_floor_items", function() {
             return {
-            	query: "lpeb_erpnext.api.bomitems_for_project",
+                query: "lpeb_erpnext.api.bomitems_for_project",
                 filters: {
                     "item_group": ["in", ["Raw Material", "Sub Assemblies"]],
                     "project_name": cur_frm.doc.project
@@ -37,14 +37,51 @@ frappe.ui.form.on('LPEB Dispatch Order', {
 });
 
 frappe.ui.form.on("LPEB Dispatch Order Office Item", {
-
-    item_code: function(doc, cdt, cdn) {
+    qty: function(doc, cdt, cdn) {
         var row = locals[cdt][cdn];
-        if (row["item_code"]) {
-            frappe.call({
+
+        if (row["qty"] > row["max_qty"]) {
+            frappe.msgprint("Qty cannot exceed " + row["max_qty"])
+            row["qty"] = 0
+        }
+    }
+
+});
+
+
+
+
+function add_custom_buttons(frm) {
+    frm.add_custom_button(__('Delivery Note'), function(){
+
+        frappe.call({
+            method: "lpeb_erpnext.api.make_dn_from_dispatch_order",
+            args: {"do": frm.doc.name},
+            freeze: true,
+            freeze_message: __("Creating Delivery Note"),
+            callback: function(r){
+                if(!r.exc) {
+                    frappe.msgprint(__(r.message));
+                } else {
+                    frappe.msgprint(__("Delivery Note could not be created. <br /> " + r.exc));
+                }
+            }
+        });
+    }, __("Make"));
+    frm.add_custom_button(__('Fetch from Office Item'), function(){
+        for (var i = 0; i<cur_frm.doc.office_items.length; i++){
+            console.log("items",cur_frm.doc.office_items[i]["item_code"]);
+            fetch_shop_item(cur_frm, cur_frm.doc.office_items[i].item_code);
+        }
+    }, __("Make"));
+}
+
+
+function fetch_shop_item(frm,item_code) {
+   frappe.call({
                 method: "lpeb_erpnext.api.get_child_items_from_bom",
                 args: {
-                    "item_code": row["item_code"],
+                    "item_code": item_code,
                     "project": cur_frm.doc.project
                 },
                 callback: function(r) {
@@ -66,39 +103,9 @@ frappe.ui.form.on("LPEB Dispatch Order Office Item", {
                     refresh_field("shop_floor_items");
                 }
             });
-        }
-    },
-    qty: function(doc, cdt, cdn) {
-        var row = locals[cdt][cdn];
-
-        if (row["qty"] > row["max_qty"]) {
-            frappe.msgprint("Qty cannot exceed " + row["max_qty"])
-            row["qty"] = 0
-        }
-    }
-
-});
-
-
-
-
-function add_custom_buttons(frm) {
-    frm.add_custom_button(__('Delivery Note'), function(){
-        frappe.call({
-            method: "lpeb_erpnext.api.make_dn_from_dispatch_order",
-            args: {"do": frm.doc.name},
-            freeze: true,
-            freeze_message: __("Creating Delivery Note"),
-            callback: function(r){
-                if(!r.exc) {
-                    frappe.msgprint(__(r.message));
-                } else {
-                    frappe.msgprint(__("Delivery Note could not be created. <br /> " + r.exc));
-                }
-            }
-        });
-    }, __("Make"));
 }
+
+
 
 function set_shop_floor_items(r){
     cur_frm.set_value("item_code", "shop_floor_items", r.item_code);
