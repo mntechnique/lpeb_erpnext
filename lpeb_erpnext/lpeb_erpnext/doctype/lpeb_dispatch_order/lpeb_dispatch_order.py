@@ -9,7 +9,7 @@ from frappe.utils import flt
 from frappe.model.document import Document
 
 class LPEBDispatchOrder(Document):
-	def validate(self):
+	def on_submit(self):
 		self.validate_actual_qty()
 		self.validate_warehouse()
 
@@ -35,72 +35,32 @@ class LPEBDispatchOrder(Document):
 
 		valid = False
 		igm = {}
-		warehouse = ""
+		warehouse1 = ""
 		item_group = ""
 
 		for item in self.shop_floor_items:
 			item_group = frappe.db.get_value("Item",{"item_code": item.item_code}, fieldname="item_group" )
-			if item_group == "Raw Material":
-				warehouse = frappe.db.get_value("Warehouse", filters={
-							"warehouse_name": _("Raw Materials"),
+
+			if item_group == "Sub Assemblies":
+				warehouse1 = frappe.db.get_value("Warehouse", filters={
+							"warehouse_name": "Finished Goods",
 							"company": frappe.defaults.get_defaults().company
 						},fieldname="name")
-				igm.update({item_group:warehouse})
-			elif item_group == "Sub Assemblies":
-				warehouse = frappe.db.get_value("Warehouse", filters={
-							"warehouse_name": _("Finished Goods"),
+				igm.update({item_group:warehouse1})
+				if igm.get("Sub Assemblies") == item.warehouse:
+					valid = True
+			elif item_group == "Raw Material":
+				warehouse1 = frappe.db.get_value("Warehouse", filters={
+							"warehouse_name": "Raw Materials",
 							"company": frappe.defaults.get_defaults().company
-						},fieldname ="name")
+						},fieldname="name")
+				igm.update({item_group:warehouse1})
+				if igm.get("Raw Material") == item.warehouse:
+					valid = True
 
-				igm.update({item_group:warehouse})
-			for x in xrange(1,1000):
-				print "item", igm.get("Raw Material")
-			if item_group == "Raw Material" and igm.get("Raw Material") == item.warehouse:
-				valid = True
-			elif item_group == "Sub Assemblies" and igm.get("Finished Goods") == item.warehouse:
-				valid = True
 			else:
 				valid = False
 
-
-
-
 			if not valid:
-				frappe.throw("Error")
-
-		# item_wh_map = { }
-		# item_group = None
-		# valid = False
-
-		# for item in self.shop_floor_items:
-		# 	item_group = frappe.db.get_value("Item",{"item_code": item.item_code}, fieldname="item_group" )
-		# 	# a = item_wh_map.append({item_group:item.warehouse})
-
-		# 	if item_group == "Raw Materials":
-		# 		if item.warehouse == "Raw Materials - L":
-		# 			valid = True;
-
-		# 	if item_group == "Sub Assemblies":
-		# 		if item.warehouse == "Finished Goods - L":
-		# 			valid = True;
-
-
-		# 	# if a.get("Raw Materials") == item.warehouse:
-		# 	# 	valid = True
-		# 	# elif a.get("Finsihed Goods") == item.warehouse:
-		# 	# 	valid = True
-		# 	# else:
-		# 	# 	Frappe.throw(_(""))
-
-
-
-
-
-
-
-
-		# 	# elif item_group == "Sub Assemblies":
-		# 	# 	item_wh_map.append({item_group:item.warehouse})
-
-		# 	# if item_wh_map.get("item_group") == :
+				frappe.throw("Enter valid warehouse in shop floor item")
 
