@@ -150,7 +150,7 @@ def get_child_items_from_bom(item_code=None, project=None):
         item_group = frappe.db.get_value("Item",{"item_code": bom_child.item_code}, fieldname="item_group" )
         abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
         warehouse = ""
-        if item_group == "Raw Materials":
+        if item_group == "Raw Material":
             warehouse = frappe.db.get_value("Warehouse", filters={
                         "warehouse_name": _("Raw Materials"),
                         "company": frappe.defaults.get_defaults().company
@@ -195,6 +195,6 @@ def lpeb_project_after_insert(self,method):
 def lpeb_bom_autoname(self, method):
     if self.project:
         self.name = self.name.replace("BOM", "BOM-" + self.project)
-   
-        
+
+
 
