@@ -84,7 +84,7 @@ doc_events = {
     },
     "BOM" : {
     	"autoname": "lpeb_erpnext.api.lpeb_bom_autoname"
-    }
+    },
 }
 
 # scheduler_events = {
@@ -117,10 +117,11 @@ doc_events = {
 # 	"frappe.desk.doctype.event.event.get_events": "lpeb_erpnext.event.get_events"
 # }
 
-fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client", "Sales Order-Client"]]]},
+fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client", "Sales Order-Client", "Production Order-Client"]]]},
             {"dt":"Custom Field", "filters": [["name", "in",
-                                                ["Item-lp_item_sub_category", "Item-lp_item_category"]]]},
-{"dt": "Print Format", "filters": [["name", "in", 
+                                                ["Item-lp_item_sub_category", "Item-lp_item_category",
+                                                "Warehouse-lpeb_project"]]]},
+            {"dt": "Print Format", "filters": [["name", "in", 
 												["Dispatch Order"]]]},
                                                 "Property Setter"]
 
