@@ -9,7 +9,7 @@ from frappe.model.document import Document
 
 class BOQ(Document):
 	def validate(self):
-		self.check_active_boq()
+		#self.check_active_boq()
 		self.check_duplicate_items()
 
 	def check_active_boq(self):
@@ -18,6 +18,7 @@ class BOQ(Document):
 			if len(boq) >= 1:
 
 				frappe.throw(_("{0} is active for this project. Cannot create new BOQ.".format(boq[0].name)))
+		#pass
 
 	def check_duplicate_items(self):
 		boq_items = self.items
