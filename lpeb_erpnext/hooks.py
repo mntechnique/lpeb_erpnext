@@ -121,7 +121,5 @@ fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Item-Client", "S
             {"dt":"Custom Field", "filters": [["name", "in",
                                                 ["Item-lp_item_sub_category", "Item-lp_item_category",
                                                 "Warehouse-lpeb_project"]]]},
-            {"dt": "Print Format", "filters": [["name", "in", 
-												["Dispatch Order"]]]},
-                                                "Property Setter"]
+            {"dt": "Print Format", "filters": [["name", "in", ["Dispatch Order"]]]}, "Property Setter"]
 

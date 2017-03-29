@@ -10,42 +10,44 @@ from frappe.model.document import Document
 
 class LPEBDispatchOrder(Document):
 	def on_submit(self):
-		self.validate_actual_qty()
 		self.validate_warehouse()
+		self.validate_actual_qty()
 
 	def validate_actual_qty(self):
-		dispatch_warehouses = frappe.get_doc("LPEB settings", "LPEB settings").dispatch_warehouses
-		d_wh = None
-		for wh in dispatch_warehouses:
-			d_wh = wh.warehouse if wh.company == frappe.defaults.get_defaults().get("company") else None
+		# dispatch_warehouses = frappe.get_doc("LPEB settings", "LPEB settings").dispatch_warehouses
+		# d_wh = None
+		# for wh in dispatch_warehouses:
+		# 	d_wh = wh.warehouse if wh.company == frappe.defaults.get_defaults().get("company") else None
 
-		if not d_wh:
-			frappe.throw("Please set Dispatch warehouse in LPEB Settings")
+		# if not d_wh:
+		# 	frappe.throw("Please set Dispatch warehouse in LPEB Settings")
 
 		for d in self.get('shop_floor_items'):
 			if d.item_code:
 				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
-					where item_code = '{item_code}' and warehouse = '{warehouse}';""".format(item_code=d.item_code, warehouse=d_wh))
+					where item_code = '{item_code}' and warehouse = '{warehouse}';""".format(item_code=d.item_code, warehouse=d.warehouse))
 
 				if len(actual_qty) == 0 or flt(actual_qty[0][0]) < d.qty:
-					frappe.throw("No Stock in Dispatch Warehouse")
+					frappe.throw("Insufficient stock for '{0}' in {1}".format(d.item_code, d.warehouse))
 
 
 	def validate_warehouse(self):
-
 		valid = False
 		igm = {}
 		warehouse1 = ""
 		item_group = ""
 
-		for item in self.shop_floor_items:
-			item_group = frappe.db.get_value("Item",{"item_code": item.item_code}, fieldname="item_group" )
+		#abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
 
+		for item in self.shop_floor_items:
+			item_group = frappe.db.get_value("Item",{"item_code": item.item_code}, fieldname="item_group")
+			
 			if item_group == "Sub Assemblies":
+				fg_wh = self.project + " - FG"
 				warehouse1 = frappe.db.get_value("Warehouse", filters={
-							"warehouse_name": "Finished Goods",
+							"warehouse_name": fg_wh,
 							"company": frappe.defaults.get_defaults().company
-						},fieldname="name")
+						}, fieldname="name")
 				igm.update({item_group:warehouse1})
 				if igm.get("Sub Assemblies") == item.warehouse:
 					valid = True

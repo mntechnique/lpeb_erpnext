@@ -68,41 +68,45 @@ function add_custom_buttons(frm) {
             }
         });
     }, __("Make"));
-    frm.add_custom_button(__('Fetch from Office Item'), function(){
+    
+    frm.add_custom_button(__('Fetch Shop Floor items'), function(){
         for (var i = 0; i<cur_frm.doc.office_items.length; i++){
             console.log("items",cur_frm.doc.office_items[i]["item_code"]);
             fetch_shop_item(cur_frm, cur_frm.doc.office_items[i].item_code);
         }
-    }, __("Make"));
+    });
 }
 
 
 function fetch_shop_item(frm,item_code) {
-   frappe.call({
-                method: "lpeb_erpnext.api.get_child_items_from_bom",
-                args: {
-                    "item_code": item_code,
-                    "project": cur_frm.doc.project
-                },
-                callback: function(r) {
-                    $.each(r.message, function(i, d) {
-                        var existing_items = [];
-                        if (cur_frm.doc.shop_floor_items) {
-                            existing_items = cur_frm.doc.shop_floor_items.filter(function(x) { return x["item_code"] == d["item_code"]});
-                        }
+    console.log("item", item_code);
+    console.log("project", cur_frm.doc.project);
 
-                        if (existing_items.length == 0) {
-                            var row = frappe.model.add_child(cur_frm.doc, "LPEB Dispatch Order Shop Floor Item", "shop_floor_items");
-                            row.item_code = d.item_code;
-                            row.qty = d.qty;
-                            row.uom = d.uom;
-                            row.warehouse = d.warehouse;
-                            row["max_qty"] = d.qty;
-                        }
-                    });
-                    refresh_field("shop_floor_items");
+    frappe.call({
+        method: "lpeb_erpnext.api.get_child_items_from_bom",
+        args: {
+            "item_code": item_code,
+            "project": cur_frm.doc.project
+        },
+        callback: function(r) {
+            $.each(r.message, function(i, d) {
+                var existing_items = [];
+                if (cur_frm.doc.shop_floor_items) {
+                    existing_items = cur_frm.doc.shop_floor_items.filter(function(x) { return x["item_code"] == d["item_code"]});
+                }
+
+                if (existing_items.length == 0) {
+                    var row = frappe.model.add_child(cur_frm.doc, "LPEB Dispatch Order Shop Floor Item", "shop_floor_items");
+                    row.item_code = d.item_code;
+                    row.qty = d.qty;
+                    row.uom = d.uom;
+                    row.warehouse = d.warehouse;
+                    row["max_qty"] = d.qty;
                 }
             });
+            refresh_field("shop_floor_items");
+        }
+    });
 }
 
 

@@ -6,15 +6,15 @@ from erpnext.controllers.queries import get_filters_cond
 
 
 
-def update_child_bom_links(project):
-	boms = frappe.get_all("BOM", filters={"project": project}, fields=["name"])
-	for bom in boms:
-		bom_items = frappe.get_all("BOM Item", filters={"parent": bom.name},fields=["*"])
-		for item in bom_items:
-			bom_id = frappe.db.get_value("BOM", filters={"item": item.item_code}, fieldname = "name")
-			if bom_id:
-				frappe.db.set_value("BOM Item", "item_code" ,item.item_code, "bom_no", bom_id)
-				frappe.db.commit()
+# def update_child_bom_links(project):
+# 	boms = frappe.get_all("BOM", filters={"project": project}, fields=["name"])
+# 	for bom in boms:
+# 		bom_items = frappe.get_all("BOM Item", filters={"parent": bom.name},fields=["*"])
+# 		for item in bom_items:
+# 			bom_id = frappe.db.get_value("BOM", filters={"item": item.item_code}, fieldname = "name")
+# 			if bom_id:
+# 				frappe.db.set_value("BOM Item", "item_code" ,item.item_code, "bom_no", bom_id)
+# 				frappe.db.commit()
 
 
 def activate_deactivate_bom(self, method):
@@ -129,77 +129,87 @@ def make_dn_from_dispatch_order(do):
 
 @frappe.whitelist()
 def get_child_items_from_bom(item_code=None, project=None):
- 	"""
-        For supplied item_code, get children from BOM of supplied project.
-    """
-    project_bom = frappe.get_all("BOM", filters={"project": project, "item": item_code})
-    project_bom_children = frappe.get_all("BOM Item", filters={"parent": project_bom[0].name}, fields=["*"])
+	"""
+		For supplied item_code, get children from BOM of supplied project.
+	"""
+	project_bom = frappe.get_all("BOM", filters={"project": project, "item": item_code})
+	project_bom_children = frappe.get_all("BOM Item", filters={"parent": project_bom[0].name}, fields=["*"])
 
-    dispatch_orders_for_project = frappe.get_all("LPEB Dispatch Order", filters={"project": project})
-    dispatch_order_names = [do["name"] for do in dispatch_orders_for_project]
-    do_shop_floor_items = frappe.get_all("LPEB Dispatch Order Shop Floor Item", filters=[["parent", "in", dispatch_order_names]], fields=["*"])
+	dispatch_orders_for_project = frappe.get_all("LPEB Dispatch Order", filters={"project": project})
+	dispatch_order_names = [do["name"] for do in dispatch_orders_for_project]
+	do_shop_floor_items = frappe.get_all("LPEB Dispatch Order Shop Floor Item", filters=[["parent", "in", dispatch_order_names]], fields=["*"])
 
-    out_items = []
+	out_items = []
 
-    for bom_child in project_bom_children:
-        dispatched_qty = 0.0
-        for sfi in do_shop_floor_items:
-            if sfi.item_code == bom_child.item_code:
-                dispatched_qty += sfi.qty
+	for bom_child in project_bom_children:
+		dispatched_qty = 0.0
+		for sfi in do_shop_floor_items:
+			if sfi.item_code == bom_child.item_code:
+				dispatched_qty += sfi.qty
 
-        item_group = frappe.db.get_value("Item",{"item_code": bom_child.item_code}, fieldname="item_group" )
-        abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
-        warehouse = ""
-        if item_group == "Raw Material":
-            warehouse = frappe.db.get_value("Warehouse", filters={
-                        "warehouse_name": _("Raw Materials"),
-                        "company": frappe.defaults.get_defaults().company
-                    },fieldname="name")
-        elif item_group == "Sub Assemblies":
-             warehouse = frappe.db.get_value("Warehouse", filters={
-                        "warehouse_name": _("Finished Goods"),
-                        "company": frappe.defaults.get_defaults().company
-                    },fieldname ="name")
-        out_items.append({
-            "item_code": bom_child.item_code,
-            "qty": bom_child.qty - dispatched_qty,
-            "uom": bom_child.stock_uom,
-            "warehouse": warehouse
-        })
+		item_group = frappe.db.get_value("Item",{"item_code": bom_child.item_code}, fieldname="item_group")
+		abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
+		
+		warehouse = ""
 
-    return out_items
+		print "item code", bom_child.item_code
+		print "project", project
+
+
+		if item_group == "Raw Material":
+			warehouse = frappe.db.get_value("Warehouse", filters={
+						"warehouse_name": _("Raw Materials"),
+						"company": frappe.defaults.get_defaults().company
+					},fieldname="name")
+		elif item_group == "Sub Assemblies":
+			wh_name = project + " - FG"
+			print "WHName for Subass", wh_name
+
+			warehouse = frappe.db.get_value("Warehouse", filters={
+						"warehouse_name": wh_name,
+						"company": frappe.defaults.get_defaults().company
+					},fieldname ="name")
+
+			
+			print "WAREHOUSE", warehouse
+
+		out_items.append({
+			"item_code": bom_child.item_code,
+			"qty": bom_child.qty - dispatched_qty,
+			"uom": bom_child.stock_uom,
+			"warehouse": warehouse
+		})
+
+	return out_items
 
 
 @frappe.whitelist()
 def lpeb_project_after_insert(self,method):
 	abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults()["company"],"abbr")
-	project_warehouse = frappe.new_doc("Warehouse")
-	project_warehouse.warehouse_name = self.name
-	project_warehouse.lpeb_project = self.name 
-	project_warehouse.is_group = 1
-	project_warehouse.save()
-	frappe.db.commit()
 
-	project_warehouse_wip = frappe.new_doc("Warehouse")
-	project_warehouse_wip.warehouse_name = self.name + " - WIP"
-	project_warehouse_wip.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
-	project_warehouse_wip.lpeb_project = self.name
-	project_warehouse_wip.save()
-	frappe.db.commit()
+	def make_warehouse(name, project_name, parent_warehouse_name="", is_group=0):
+		project_warehouse = frappe.new_doc("Warehouse")
+		project_warehouse.warehouse_name = name
+		project_warehouse.lpeb_project = project_name
+		
+		if parent_warehouse_name:
+			project_warehouse.parent_warehouse = parent_warehouse_name
 
-	project_warehouse_fg = frappe.new_doc("Warehouse")
-	project_warehouse_fg.warehouse_name = self.name + " - FG"
-	project_warehouse_fg.parent_warehouse = project_warehouse.warehouse_name + " - " + abbr
-	project_warehouse_fg.lpeb_project = self.name
-	project_warehouse_fg.save()
-	frappe.db.commit()
+		if is_group == 1:
+			project_warehouse.is_group = is_group
 
+		project_warehouse.save()
+		frappe.db.commit()	
+
+	make_warehouse(self.name, self.name, "", is_group=1)
+	make_warehouse(self.name + " - WIP", self.name, self.name + " - " + abbr)
+	make_warehouse(self.name + " - QC", self.name, self.name + " - " + abbr)
+	make_warehouse(self.name + " - FG", self.name, self.name + " - " + abbr)
 
 @frappe.whitelist()
 def lpeb_bom_autoname(self, method):
 	if self.project:
-		self.name = self.name.replace("BOM", "BOM-" + self.project)
-   
+		self.name = self.name.replace("BOM", "BOM-" + self.project)   
 		
 @frappe.whitelist()
 def create_qi_for_se(stock_entry_name):
@@ -222,7 +232,7 @@ def create_qi_for_se(stock_entry_name):
 
 	except Exception as e:
 		frappe.db.rollback()
-	 	frappe.throw("Quality Inspection entries were not created. <br><br> {0}".format(ex))
+		frappe.throw("Quality Inspection entries were not created. <br><br> {0}".format(ex))
 
 @frappe.whitelist()
 def get_warehouses_for_project(project_name):
@@ -230,15 +240,17 @@ def get_warehouses_for_project(project_name):
 		filters={"lpeb_project": project_name}, 
 		fields=["*"])
 
-	if len(warehouses) > 3:
-		frappe.throw("There may be only 3 warehouses for a project. <br> There appear to be {0}".format(len(warehouses)))
+	if len(warehouses) > 4:
+		frappe.throw("There may be only 4 warehouses for a project. (Parent, FG, WIP, QC)<br> There appear to be {0}".format(len(warehouses)))
 
 	fg_warehouse = [wh for wh in warehouses if "FG" in wh.name]
 	wip_warehouse = [wh for wh in warehouses if "WIP" in wh.name]
+	qc_warehouse = [wh for wh in warehouses if "QC" in wh.name]
 
-	print "FG:", fg_warehouse, "WIP:", wip_warehouse
+	#print "FG:", fg_warehouse, "WIP:", wip_warehouse
 
 	return {
 		"fg_warehouse": fg_warehouse[0], 
-		"wip_warehouse": wip_warehouse[0] 
+		"wip_warehouse": wip_warehouse[0],
+		"qc_warehouse": qc_warehouse[0]
 	}
