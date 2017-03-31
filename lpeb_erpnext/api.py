@@ -117,7 +117,8 @@ def make_dn_from_dispatch_order(do):
 			"item_code": doi.item_code,
 			"item_name": odoi.item_name,
 			"description": odoi.description,
-			"qty": frappe.db.get_value("LPEB Dispatch Order Shop Floor Item", filters={"parent": do, "item_code": doi.item_code}, fieldname="qty")
+			"qty": frappe.db.get_value("LPEB Dispatch Order Shop Floor Item", filters={"parent": do, "item_code": doi.item_code}, fieldname="qty"),
+			"warehouse": doi.warehouse
 		})
 
 	try:

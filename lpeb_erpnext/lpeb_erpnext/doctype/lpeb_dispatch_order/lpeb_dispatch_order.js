@@ -1,5 +1,5 @@
-// Copyright (c) 2016, MN Technique and contributors
-// For license information, please see license.txt
+//Copyright (c) 2016, MN Technique and contributors
+//For license information, please see license.txt
 
 frappe.ui.form.on('LPEB Dispatch Order', {
     refresh: function(frm) {
@@ -48,40 +48,41 @@ frappe.ui.form.on("LPEB Dispatch Order Office Item", {
 
 });
 
-
-
-
 function add_custom_buttons(frm) {
-    frm.add_custom_button(__('Delivery Note'), function(){
-
-        frappe.call({
-            method: "lpeb_erpnext.api.make_dn_from_dispatch_order",
-            args: {"do": frm.doc.name},
-            freeze: true,
-            freeze_message: __("Creating Delivery Note"),
-            callback: function(r){
-                if(!r.exc) {
-                    frappe.msgprint(__(r.message));
-                } else {
-                    frappe.msgprint(__("Delivery Note could not be created. <br /> " + r.exc));
+    if (cur_frm.doc.docstatus == 1) {
+        frm.add_custom_button(__('Delivery Note'), function(){
+            frappe.call({
+                method: "lpeb_erpnext.api.make_dn_from_dispatch_order",
+                args: {"do": frm.doc.name},
+                freeze: true,
+                freeze_message: __("Creating Delivery Note"),
+                callback: function(r){
+                    if(!r.exc) {
+                        frappe.msgprint(__(r.message));
+                    } else {
+                        frappe.msgprint(__("Delivery Note could not be created. <br /> " + r.exc));
+                    }
+                }
+            });
+        }, __("Make"));
+    }
+    
+    if (cur_frm.doc.docstatus == 0) {
+        frm.add_custom_button(__('Fetch Shop Floor items'), function(){
+            if ([undefined, "", null].indexOf(cur_frm.doc.project) != -1) {
+                frappe.msgprint("Please select Project before fetching items.")
+            } else if (cur_frm.doc.sales_order == "") {
+                frappe.msgprint("Please select Sales Order before fetching items.")
+            } else {
+                for (var i = 0; i<cur_frm.doc.office_items.length; i++){
+                    fetch_shop_item(cur_frm, cur_frm.doc.office_items[i].item_code);
                 }
             }
         });
-    }, __("Make"));
-    
-    frm.add_custom_button(__('Fetch Shop Floor items'), function(){
-        for (var i = 0; i<cur_frm.doc.office_items.length; i++){
-            console.log("items",cur_frm.doc.office_items[i]["item_code"]);
-            fetch_shop_item(cur_frm, cur_frm.doc.office_items[i].item_code);
-        }
-    });
+    }
 }
 
-
 function fetch_shop_item(frm,item_code) {
-    console.log("item", item_code);
-    console.log("project", cur_frm.doc.project);
-
     frappe.call({
         method: "lpeb_erpnext.api.get_child_items_from_bom",
         args: {
