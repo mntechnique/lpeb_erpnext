@@ -153,10 +153,6 @@ def get_child_items_from_bom(item_code=None, project=None):
 		
 		warehouse = ""
 
-		print "item code", bom_child.item_code
-		print "project", project
-
-
 		if item_group == "Raw Material":
 			warehouse = frappe.db.get_value("Warehouse", filters={
 						"warehouse_name": _("Raw Materials"),
@@ -164,22 +160,18 @@ def get_child_items_from_bom(item_code=None, project=None):
 					},fieldname="name")
 		elif item_group == "Sub Assemblies":
 			wh_name = project + " - FG"
-			print "WHName for Subass", wh_name
-
 			warehouse = frappe.db.get_value("Warehouse", filters={
 						"warehouse_name": wh_name,
 						"company": frappe.defaults.get_defaults().company
 					},fieldname ="name")
 
-			
-			print "WAREHOUSE", warehouse
-
-		out_items.append({
-			"item_code": bom_child.item_code,
-			"qty": bom_child.qty - dispatched_qty,
-			"uom": bom_child.stock_uom,
-			"warehouse": warehouse
-		})
+		if bom_child.qty - dispatched_qty > 0:
+			out_items.append({
+				"item_code": bom_child.item_code,
+				"qty": bom_child.qty - dispatched_qty,
+				"uom": bom_child.stock_uom,
+				"warehouse": warehouse
+			})
 
 	return out_items
 
