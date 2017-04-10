@@ -170,7 +170,8 @@ def get_child_items_from_bom(item_code=None, project=None):
 				"item_code": bom_child.item_code,
 				"qty": bom_child.qty - dispatched_qty,
 				"uom": bom_child.stock_uom,
-				"warehouse": warehouse
+				"warehouse": warehouse,
+				"parent_item": item_code
 			})
 
 	return out_items

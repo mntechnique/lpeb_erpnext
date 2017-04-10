@@ -102,6 +102,7 @@ function fetch_shop_item(frm,item_code) {
                     row.qty = d.qty;
                     row.uom = d.uom;
                     row.warehouse = d.warehouse;
+                    row.parent_item = d.parent_item;
                     row["max_qty"] = d.qty;
                 }
             });
@@ -109,8 +110,6 @@ function fetch_shop_item(frm,item_code) {
         }
     });
 }
-
-
 
 function set_shop_floor_items(r){
     cur_frm.set_value("item_code", "shop_floor_items", r.item_code);
