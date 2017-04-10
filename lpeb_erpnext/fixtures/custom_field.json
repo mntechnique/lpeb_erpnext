@@ -1,6 +1,7 @@
 [
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -14,7 +15,6 @@
   "hidden": 0, 
   "ignore_user_permissions": 0, 
   "ignore_xss_filter": 0, 
-  "in_filter": 0, 
   "in_list_view": 0, 
   "in_standard_filter": 1, 
   "insert_after": "create_account_under", 
