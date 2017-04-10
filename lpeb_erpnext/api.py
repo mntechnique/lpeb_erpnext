@@ -89,7 +89,8 @@ def make_dispatch_order_from_so(so):
 
 	for soi in oso.items:
 		odo.append("office_items", {
-			"item_code": soi.item_code
+			"item_code": soi.item_code,
+			"weight": soi.qty
 		})
 
 	try:
@@ -99,34 +100,6 @@ def make_dispatch_order_from_so(so):
 	except Exception as e:
 		raise
 
-@frappe.whitelist()
-def make_dn_from_dispatch_order(do):
-	if not do:
-		return {"exc": "Invalid Sales Order ID"}
-
-	odo = frappe.get_doc("LPEB Dispatch Order", do)
-
-	odn = frappe.new_doc("Delivery Note")
-	odn.customer =  frappe.db.get_value("Sales Order", odo.sales_order, "customer")
-
-	for doi in odo.shop_floor_items:
-
-		odoi = frappe.get_doc("Item", {"item_code": doi.item_code})
-
-		odn.append("items", {
-			"item_code": doi.item_code,
-			"item_name": odoi.item_name,
-			"description": odoi.description,
-			"qty": frappe.db.get_value("LPEB Dispatch Order Shop Floor Item", filters={"parent": do, "item_code": doi.item_code}, fieldname="qty"),
-			"warehouse": doi.warehouse
-		})
-
-	try:
-		odn.save()
-		frappe.db.commit()
-		return "Delivery Note #{0} created successfully.".format(odn.name)
-	except Exception as e:
-		raise
 
 @frappe.whitelist()
 def get_child_items_from_bom(item_code=None, project=None):
@@ -134,6 +107,10 @@ def get_child_items_from_bom(item_code=None, project=None):
 		For supplied item_code, get children from BOM of supplied project.
 	"""
 	project_bom = frappe.get_all("BOM", filters={"project": project, "item": item_code})
+
+	if not project_bom:
+		frappe.throw("BOM for '{0}' not found.".format(item_code))
+
 	project_bom_children = frappe.get_all("BOM Item", filters={"parent": project_bom[0].name}, fields=["*"])
 
 	dispatch_orders_for_project = frappe.get_all("LPEB Dispatch Order", filters={"project": project})

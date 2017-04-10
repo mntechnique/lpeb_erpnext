@@ -76,22 +76,24 @@ class LPEBDispatchOrder(Document):
 		if len(self.office_items) != len(set(self.office_items)):
 			frappe.throw("Please remove duplicate office items.")
 
-		#Items not in SO, blank items and total SO Qty cap
 		so = frappe.get_doc("Sales Order", self.sales_order)
-		
 		for oi in self.office_items:
+			#Item not set in Office Item
 			if not oi.item_code:
-				frappe.throw("Office Item #{0}: Please select an item, or delete the row.".format(oi.idx))
+				frappe.throw("Office Details #{0}: Please select an item, or delete the row.".format(oi.idx))
 
+			#Item does not belong to SO
 			so_item = [soi for soi in so.items if soi.item_code == oi.item_code]
 			if len(so_item) == 0:
-				frappe.throw("Item '{0}' is not in Sales Order '{1}' and cannot be added here.".format(oi.item_code, self.sales_order))
+				frappe.throw("Item '{0}' does not belong to Sales Order '{1}'.".format(oi.item_code, self.sales_order))
 
-			if not oi.weight:
-				frappe.throw("Office Item #{0}: Please set weight for '{1}'.".format(oi.idx, oi.item_code))
-
+			#Weight cap on total SO item weight.
 			if oi.weight > so_item[0].qty: 
-				frappe.throw("Weight of '{0}' should not exceed {1} kg(s).".format(oi.item_code, so_item[0].qty)) 
+				frappe.throw("Weight of '{0}' cannot exceed {1} kg(s).".format(oi.item_code, so_item[0].qty))
+
+			#Weight cap on Shop Floor Items based on parent Office Item.
+			if sum([sfi.weight for sfi in self.shop_floor_items if sfi.parent_item == oi.item_code]) > oi.weight:
+				frappe.throw("Weight of component items for '{0}' cannot exceed {1} kg(s).".format(oi.item_code, oi.weight))				
 
 
 	def validate_shop_floor_items(self):
@@ -99,22 +101,31 @@ class LPEBDispatchOrder(Document):
 		if len(self.shop_floor_items) != len(set(self.shop_floor_items)):
 			frappe.throw("Please remove duplicate shop floor items.")
 
-		#Blank items, items without weight
+		
 		for sfi in self.shop_floor_items:
+			#Item code not set in SFI
 			if not sfi.item_code:
-				frappe.throw("Shop Floor Item #{0}: Please select an item, or delete the row.".format(sfi.idx))
+				frappe.throw("Shop Floor Details #{0}: Please select an item, or delete the row.".format(sfi.idx))
+			#Invalid weight
 			if not sfi.weight:
-				frappe.throw("Shop Floor Item #{0}: Please set weight for '{1}'".format(sfi.idx, sfi.item_code))
+				frappe.throw("Shop Floor Details #{0}: Please set weight for '{1}'".format(sfi.idx, sfi.item_code))
 
-		#Total weight cap
-		total_office_items_weight = sum([oi.weight or 0.0 for oi in self.office_items])
-		total_shop_floor_items_weight = sum([sfi.weight or 0.0 for sfi in self.shop_floor_items])
-		if total_shop_floor_items_weight > total_office_items_weight:
-			frappe.throw("Total weight of shop floor items should not exceed total weight of office items.")
-
+		
 	def pre_submit_validation(self):
 		if (len(self.office_items) == 0):
 			frappe.throw("Please enter at least one item under Office Details Details.")
 
 		if (len(self.shop_floor_items) == 0):
 			frappe.throw("Please enter at least one item under Shop Floor Details.")
+
+		if (len([oi for oi in self.office_items if not oi.weight]) > 0):
+			frappe.throw("All items under Office Details must have valid weights.")
+
+		if (len([sfi for sfi in self.shop_floor_items if not sfi.weight]) > 0):
+			frappe.throw("All items under Shop Floor Details must have valid weights.")
+
+		# #Total weight cap
+		# total_office_items_weight = sum([oi.weight or 0.0 for oi in self.office_items])
+		# total_shop_floor_items_weight = sum([sfi.weight or 0.0 for sfi in self.shop_floor_items])
+		# if total_shop_floor_items_weight > total_office_items_weight:
+		# 	frappe.throw("Total weight of Shop Floor Details items cannot exceed total weight of Office Details items.")

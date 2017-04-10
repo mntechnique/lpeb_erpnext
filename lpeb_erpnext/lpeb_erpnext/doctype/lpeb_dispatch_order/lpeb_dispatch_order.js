@@ -49,23 +49,6 @@ frappe.ui.form.on("LPEB Dispatch Order Office Item", {
 });
 
 function add_custom_buttons(frm) {
-    if (cur_frm.doc.docstatus == 1) {
-        frm.add_custom_button(__('Delivery Note'), function(){
-            frappe.call({
-                method: "lpeb_erpnext.api.make_dn_from_dispatch_order",
-                args: {"do": frm.doc.name},
-                freeze: true,
-                freeze_message: __("Creating Delivery Note"),
-                callback: function(r){
-                    if(!r.exc) {
-                        frappe.msgprint(__(r.message));
-                    } else {
-                        frappe.msgprint(__("Delivery Note could not be created. <br /> " + r.exc));
-                    }
-                }
-            });
-        }, __("Make"));
-    }
     
     if (cur_frm.doc.docstatus == 0) {
         frm.add_custom_button(__('Fetch Shop Floor items'), function(){
