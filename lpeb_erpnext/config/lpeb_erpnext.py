@@ -14,6 +14,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Sales Invoice",
+					"label": "Sales Invoices",
+					"description": _("List of Sales Invoices"),
+				},
+				{
+					"type": "doctype",
 					"name": "Project",
 					"label": "Projects",
 					"description": _("List of Projects"),

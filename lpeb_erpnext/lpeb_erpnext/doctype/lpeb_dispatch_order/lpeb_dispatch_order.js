@@ -33,6 +33,27 @@ frappe.ui.form.on('LPEB Dispatch Order', {
                 }
             }
         });
+
+        if (frm.doc.docstatus == 1) {
+            frm.add_custom_button(__('Sales Invoice'), function(){
+                if ([undefined, "", null].indexOf(cur_frm.doc.project) != -1) {
+                    frappe.msgprint("Please select Project.")
+                } else if (cur_frm.doc.sales_order == "") {
+                    frappe.msgprint("Please select Sales Order.")
+                } else {
+                    frappe.call({
+                        method: "create_si",
+                        doc: cur_frm.doc,
+                        args: {"sales_order": cur_frm.doc.sales_order },
+                        callback: function (r) {
+                            if (r.message) {
+                                frappe.show_alert(r.message, 5);
+                            }
+                        } 
+                    });
+                }
+            });
+        }
     },
 });
 
@@ -67,7 +88,7 @@ function add_custom_buttons(frm) {
 
 function fetch_shop_item(frm,item_code) {
     frappe.call({
-        method: "lpeb_erpnext.api.get_child_items_from_bom",
+        method: "lpeb_erpnext.api.get_shop_floor_items",
         args: {
             "item_code": item_code,
             "project": cur_frm.doc.project

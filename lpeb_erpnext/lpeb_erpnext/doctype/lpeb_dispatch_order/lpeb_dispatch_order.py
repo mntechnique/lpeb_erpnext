@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
+from lpeb_erpnext.api import get_warehouses_for_project
 
 class LPEBDispatchOrder(Document):
 	
@@ -14,6 +15,7 @@ class LPEBDispatchOrder(Document):
 		self.validate_warehouse()
 		self.validate_actual_qty()
 		self.pre_submit_validation()
+		self.make_repack_entries()
 
 	def validate(self):
 		self.validate_office_items()
@@ -92,9 +94,8 @@ class LPEBDispatchOrder(Document):
 				frappe.throw("Weight of '{0}' cannot exceed {1} kg(s).".format(oi.item_code, so_item[0].qty))
 
 			#Weight cap on Shop Floor Items based on parent Office Item.
-			if sum([sfi.weight for sfi in self.shop_floor_items if sfi.parent_item == oi.item_code]) > oi.weight:
+			if sum([sfi.weight or 0.0 for sfi in self.shop_floor_items if sfi.parent_item == oi.item_code]) > oi.weight:
 				frappe.throw("Weight of component items for '{0}' cannot exceed {1} kg(s).".format(oi.item_code, oi.weight))				
-
 
 	def validate_shop_floor_items(self):
 		#Duplicates
@@ -109,8 +110,7 @@ class LPEBDispatchOrder(Document):
 			#Invalid weight
 			if not sfi.weight:
 				frappe.throw("Shop Floor Details #{0}: Please set weight for '{1}'".format(sfi.idx, sfi.item_code))
-
-		
+	
 	def pre_submit_validation(self):
 		if (len(self.office_items) == 0):
 			frappe.throw("Please enter at least one item under Office Details Details.")
@@ -129,3 +129,55 @@ class LPEBDispatchOrder(Document):
 		# total_shop_floor_items_weight = sum([sfi.weight or 0.0 for sfi in self.shop_floor_items])
 		# if total_shop_floor_items_weight > total_office_items_weight:
 		# 	frappe.throw("Total weight of Shop Floor Details items cannot exceed total weight of Office Details items.")
+
+	def make_repack_entries(self):
+		project_warehouses = get_warehouses_for_project(self.project)
+
+		fg_warehouse = project_warehouses["fg_warehouse"]
+
+		for oi in self.office_items:
+			sfi_list = [sfi for sfi in self.shop_floor_items if sfi.parent_item == oi.item_code]
+
+			re = frappe.new_doc("Stock Entry")
+			re.purpose = "Repack"
+			re.lpeb_dispatch_order = self.name
+			re.project = self.project 
+
+			for sfi in sfi_list:
+				re.append("items", {
+					"item_code": sfi.item_code,
+					"qty": sfi.weight,
+					"uom": sfi.weight_uom,
+					"stock_uom": sfi.weight_uom,
+					"conversion_factor": 1.0,
+					"s_warehouse": fg_warehouse
+				})
+
+			re.append("items", {
+				"item_code": oi.item_code,
+				"qty": oi.weight,
+				"uom": frappe.db.get_value("Item", oi.item_code, "stock_uom"),
+				"conversion_factor": 1.0,
+				"t_warehouse": fg_warehouse
+			})
+
+			re.save()
+			re.submit()
+			frappe.db.commit()
+
+	def create_si(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		
+		si = make_sales_invoice(so.name)
+		si.lpeb_dispatch_order = self.name
+
+		for sfi in self.shop_floor_items:
+			si.append("lpeb_item_details", {
+				"item_code": sfi.item_code,
+				"weight": sfi.weight,
+				"UOM": sfi.uom
+			})
+		si.save()
+		frappe.db.commit()
+
+		return si.name

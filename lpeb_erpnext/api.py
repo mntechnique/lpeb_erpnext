@@ -90,7 +90,8 @@ def make_dispatch_order_from_so(so):
 	for soi in oso.items:
 		odo.append("office_items", {
 			"item_code": soi.item_code,
-			"weight": soi.qty
+			"weight": soi.qty,
+			"weight_uom": soi.stock_uom
 		})
 
 	try:
@@ -102,14 +103,14 @@ def make_dispatch_order_from_so(so):
 
 
 @frappe.whitelist()
-def get_child_items_from_bom(item_code=None, project=None):
+def get_shop_floor_items(item_code=None, project=None):
 	"""
 		For supplied item_code, get children from BOM of supplied project.
 	"""
 	project_bom = frappe.get_all("BOM", filters={"project": project, "item": item_code})
 
-	if not project_bom:
-		frappe.throw("BOM for '{0}' not found.".format(item_code))
+	# if not project_bom:
+	# 	frappe.throw("BOM for '{0}' not found.".format(item_code))
 
 	project_bom_children = frappe.get_all("BOM Item", filters={"parent": project_bom[0].name}, fields=["*"])
 
@@ -225,3 +226,16 @@ def get_warehouses_for_project(project_name):
 		"wip_warehouse": wip_warehouse[0],
 		"qc_warehouse": qc_warehouse[0]
 	}
+
+@frappe.whitelist()
+def get_memo_details_for_si_items(si_items, dispatch_order):
+	si_items = json.loads(si_items)
+
+	child_item_list = []
+	do = frappe.get_doc("LPEB Dispatch Order", dispatch_order)
+
+	for si_item in si_items:
+		child_item_list = child_item_list + [sfi for sfi in do.shop_floor_items if sfi.parent_item == si_item.get("item_code")]
+			
+	print "Child Item List", child_item_list
+	return child_item_list
