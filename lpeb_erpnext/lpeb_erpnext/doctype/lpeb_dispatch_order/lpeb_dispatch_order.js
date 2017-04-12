@@ -52,7 +52,7 @@ frappe.ui.form.on('LPEB Dispatch Order', {
                         } 
                     });
                 }
-            });
+            }, __("Make"));
         }
     },
 });

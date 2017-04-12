@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
 from lpeb_erpnext.api import get_warehouses_for_project
+from erpnext import get_default_company
 
 class LPEBDispatchOrder(Document):
 	
@@ -141,43 +142,55 @@ class LPEBDispatchOrder(Document):
 			re = frappe.new_doc("Stock Entry")
 			re.purpose = "Repack"
 			re.lpeb_dispatch_order = self.name
-			re.project = self.project 
+			re.project = self.project
+
+			re.posting_date = frappe.utils.getdate()
+			re.posting_time = frappe.utils.get_time(frappe.utils.get_datetime())
+			re.company = get_default_company()
 
 			for sfi in sfi_list:
+			# 	print "sfi.item_code: ", sfi.item_code, ", sfi.qty: ", sfi.qty, ", sfi.uom: ", sfi.uom, ", source_wh", fg_warehouse
+			# print "oi.item_code: ", oi.item_code, ", oi.qty: ", oi.weight, ", oi.uom: ", oi.weight_uom, ", target_wh", fg_warehouse
 				re.append("items", {
 					"item_code": sfi.item_code,
-					"qty": sfi.weight,
-					"uom": sfi.weight_uom,
-					"stock_uom": sfi.weight_uom,
+					"qty": sfi.qty,
+					"uom": sfi.uom,
 					"conversion_factor": 1.0,
-					"s_warehouse": fg_warehouse
+					"s_warehouse": fg_warehouse.name
 				})
 
 			re.append("items", {
 				"item_code": oi.item_code,
 				"qty": oi.weight,
-				"uom": frappe.db.get_value("Item", oi.item_code, "stock_uom"),
+				"uom": oi.weight_uom, #frappe.db.get_value("Item", oi.item_code, "stock_uom") or "Kg",
 				"conversion_factor": 1.0,
-				"t_warehouse": fg_warehouse
+				"t_warehouse": fg_warehouse.name
 			})
 
 			re.save()
 			re.submit()
 			frappe.db.commit()
 
+
 	def create_si(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 		
-		si = make_sales_invoice(so.name)
+		si = make_sales_invoice(self.sales_order)
 		si.lpeb_dispatch_order = self.name
 
 		for sfi in self.shop_floor_items:
 			si.append("lpeb_item_details", {
-				"item_code": sfi.item_code,
+				"item": sfi.item_code,
 				"weight": sfi.weight,
-				"UOM": sfi.uom
+				"UOM": sfi.weight_uom
 			})
-		si.save()
-		frappe.db.commit()
 
-		return si.name
+		try:
+			si.save()
+			frappe.db.commit()
+		except Exception as e:
+			return "Could not create Sales Invoice. <br>{0}".format(e.message)
+		else:
+			return "Sales Invoice #{0} created successfully.".format(si.name)
+			
+		
