@@ -21,9 +21,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Sales Invoice", 
-  "modified": "2017-04-12 00:14:31.133015", 
+  "modified": "2017-04-12 18:34:00.126715", 
   "name": "Sales Invoice-Client", 
-  "script": "frappe.ui.form.on(\"Sales Invoice\", {\n\t\"refresh\": function(frm) {\n\n\t\tconsole.log(\"Project\", cur_frm.doc.project);\n\t\tconsole.log(\"Items\", cur_frm.doc.items);\n\n\t\tcur_frm.add_custom_button(__('Get Memo items'), function(){\n\t\t\tfrappe.call({\n\t\t\t\t\"method\": \"lpeb_erpnext.api.get_memo_details_for_si_items\",\n\t\t\t\t\"args\": { \"si_items\": cur_frm.doc.items, \"project\": cur_frm.doc.dispatch_order },\n\t\t\t\t\"callback\": function(r) {\n\t\t\t\t\tconosle.log(\"retval\", r);\n\n\t\t\t\t\tif (r.message) {\n\t\t\t\t\t\t$.each(r.message, function(index, item) {\n\t\t\t\t\t\t\tvar row = frappe.model.add_child(cur_frm.doc, \"LPEB Sales Invoice Item Detail\", \"accounts\");\n\t\t\t\t\t\t\trow.item_code = item.item_code;\n\t\t\t\t\t\t\trow.weight = item.weight;\n\t\t\t\t\t\t\trow.uom = item.uom;\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t});\n\t\t});\n\t}\n});\n", 
+  "script": "frappe.ui.form.on(\"Sales Invoice\", {\n\t\"refresh\": function(frm) {\n\t\tcur_frm.add_custom_button(__('Get Memo items'), function(){\n\t\t\tfrappe.call({\n\t\t\t\t\"method\": \"lpeb_erpnext.api.get_memo_details_for_si_items\",\n\t\t\t\t\"args\": { \"si_items\": cur_frm.doc.items, \"dispatch_order\": cur_frm.doc.dispatch_order },\n\t\t\t\t\"callback\": function(r) {\n\t\t\t\t\tif (r.message) {\n\t\t\t\t\t\t$.each(r.message, function(index, item) {\n\t\t\t\t\t\t\tvar row = frappe.model.add_child(cur_frm.doc, \"LPEB Sales Invoice Item Detail\", \"accounts\");\n\t\t\t\t\t\t\trow.item_code = item.item_code;\n\t\t\t\t\t\t\trow.weight = item.weight;\n\t\t\t\t\t\t\trow.uom = item.uom;\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t});\n\t\t});\n\t}\n});\n", 
   "script_type": "Client"
  }
 ]
