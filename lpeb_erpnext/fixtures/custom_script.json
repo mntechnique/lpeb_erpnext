@@ -12,9 +12,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Production Order", 
-  "modified": "2017-03-28 13:43:47.378312", 
+  "modified": "2017-04-14 10:02:59.737637", 
   "name": "Production Order-Client", 
-  "script": "frappe.ui.form.on(\"Production Order\", {\n\t\"project\": function(frm) {\n\t\tfrappe.call({\n\t\t\tmethod: \"lpeb_erpnext.api.get_warehouses_for_project\",\n\t\t\targs: { project_name: cur_frm.doc.project},\n\t\t\tcallback: function(r) {\n\t\t\t\tif (r.message) {\n\t\t\t\t\tcur_frm.set_value(\"wip_warehouse\", r.message.wip_warehouse.name);\n\t\t\t\t\tcur_frm.set_value(\"fg_warehouse\", r.message.qc_warehouse.name);\n\t\t\t\t}\n\t\t\t}\t\n\t\t})\n\t}\n});", 
+  "script": "frappe.ui.form.on(\"Production Order\", {\n\t\"project\": function(frm) {\n\t\tfrappe.call({\n\t\t\tmethod: \"lpeb_erpnext.api.get_warehouses_for_project\",\n\t\t\targs: { project_name: cur_frm.doc.project},\n\t\t\tcallback: function(r) {\n\t\t\t\tif (r.message) {\n\t\t\t\t\tcur_frm.set_value(\"fg_warehouse\", r.message.qc_warehouse.name);\n\t\t\t\t}\n\t\t\t}\t\n\t\t})\n\t}\n});", 
   "script_type": "Client"
  }, 
  {
