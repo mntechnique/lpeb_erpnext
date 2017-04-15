@@ -41,7 +41,7 @@ class BOQ(Document):
 
 	def submit_boms(self):
 		subassemblies = [i for i in self.items if frappe.db.get_value("Item", i.item, "item_group") == "Sub Assemblies"]
-		
+
 		for sa in subassemblies:
 			children = [i for i in self.items if i.parent_item == sa.item]
 			if len(children) > 0:
@@ -62,7 +62,7 @@ class BOQ(Document):
 							"qty": child.qty,
 							"stock_uom": child.uom
 						})
-					
+
 					b_sa.save()
 					b_sa.submit()
 					frappe.db.commit()
@@ -80,7 +80,7 @@ class BOQ(Document):
 					b_fg.item = p.item
 					b_fg.project = self.project
 
-					print "BOM for ", sa.item, "project: ", self.project
+					# print "BOM for ", sa.item, "project: ", self.project
 
 					for child in children:
 						b_fg.append("items", {
@@ -93,7 +93,7 @@ class BOQ(Document):
 					b_fg.submit()
 					frappe.db.commit()
 
-	def cancel_boms(self):		
+	def cancel_boms(self):
 		products = [i for i in self.items if frappe.db.get_value("Item", i.item, "item_group") == "Products"]
 		for p in products:
 			print "Fetching BOM for cancelling: Project", self.project, "Item", p.item

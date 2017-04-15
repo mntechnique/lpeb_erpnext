@@ -108,6 +108,8 @@ def get_shop_floor_items(item_code=None, project=None):
 		For supplied item_code, get children from BOM of supplied project.
 	"""
 	project_bom = frappe.get_all("BOM", filters={"project": project, "item": item_code})
+	project_boq = frappe.db.get_value("BOQ", filters={"project":project})
+	boq = frappe.get_doc("BOQ", project_boq)
 
 	# if not project_bom:
 	# 	frappe.throw("BOM for '{0}' not found.".format(item_code))
@@ -143,12 +145,19 @@ def get_shop_floor_items(item_code=None, project=None):
 						"company": frappe.defaults.get_defaults().company
 					},fieldname ="name")
 
+
+
 		if bom_child.qty - dispatched_qty > 0:
+			boq_item = [i for i in boq.items if i.item == bom_child.item_code ]
+			print "unit weight", boq_item[0].unit_weight
+			boq_weight= boq_item[0].unit_weight
 			out_items.append({
 				"item_code": bom_child.item_code,
 				"qty": bom_child.qty - dispatched_qty,
 				"uom": bom_child.stock_uom,
 				"warehouse": warehouse,
+				"unit_weight": boq_weight,
+				"weight": boq_weight * (bom_child.qty - dispatched_qty),
 				"parent_item": item_code
 			})
 

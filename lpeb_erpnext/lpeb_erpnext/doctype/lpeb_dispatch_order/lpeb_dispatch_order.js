@@ -49,7 +49,7 @@ frappe.ui.form.on('LPEB Dispatch Order', {
                             if (r.message) {
                                 frappe.show_alert(r.message, 5);
                             }
-                        } 
+                        }
                     });
                 }
             }, __("Make"));
@@ -70,7 +70,7 @@ frappe.ui.form.on("LPEB Dispatch Order Office Item", {
 });
 
 function add_custom_buttons(frm) {
-    
+
     if (cur_frm.doc.docstatus == 0) {
         frm.add_custom_button(__('Fetch Shop Floor items'), function(){
             if ([undefined, "", null].indexOf(cur_frm.doc.project) != -1) {
@@ -106,6 +106,8 @@ function fetch_shop_item(frm,item_code) {
                     row.qty = d.qty;
                     row.uom = d.uom;
                     row.warehouse = d.warehouse;
+                    row.unit_weight = d.unit_weight;
+                    row.weight = d.unit_weight * d.qty;
                     row.parent_item = d.parent_item;
                     row["max_qty"] = d.qty;
                 }
