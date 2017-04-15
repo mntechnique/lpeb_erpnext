@@ -156,7 +156,6 @@ def get_shop_floor_items(item_code=None, project=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def lpeb_project_after_insert(self,method):
 	abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults()["company"],"abbr")
 
