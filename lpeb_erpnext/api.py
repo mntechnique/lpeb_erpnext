@@ -128,7 +128,7 @@ def get_shop_floor_items(item_code=None, project=None):
 
 		item_group = frappe.db.get_value("Item",{"item_code": bom_child.item_code}, fieldname="item_group")
 		abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
-		
+
 		warehouse = ""
 
 		if item_group == "Raw Material":
@@ -163,7 +163,7 @@ def lpeb_project_after_insert(self,method):
 		project_warehouse = frappe.new_doc("Warehouse")
 		project_warehouse.warehouse_name = name
 		project_warehouse.lpeb_project = project_name
-		
+
 		if parent_warehouse_name:
 			project_warehouse.parent_warehouse = parent_warehouse_name
 
@@ -171,18 +171,17 @@ def lpeb_project_after_insert(self,method):
 			project_warehouse.is_group = is_group
 
 		project_warehouse.save()
-		frappe.db.commit()	
+		frappe.db.commit()
 
 	make_warehouse(self.name, self.name, "", is_group=1)
-	make_warehouse(self.name + " - WIP", self.name, self.name + " - " + abbr)
 	make_warehouse(self.name + " - QC", self.name, self.name + " - " + abbr)
 	make_warehouse(self.name + " - FG", self.name, self.name + " - " + abbr)
 
 @frappe.whitelist()
 def lpeb_bom_autoname(self, method):
 	if self.project:
-		self.name = self.name.replace("BOM", "BOM-" + self.project)   
-		
+		self.name = self.name.replace("BOM", "BOM-" + self.project)
+
 @frappe.whitelist()
 def create_qi_for_se(stock_entry_name):
 	se_items = frappe.get_all("Stock Entry Item", filters={"parent": stock_entry_name}, fields=["*"])
@@ -208,8 +207,8 @@ def create_qi_for_se(stock_entry_name):
 
 @frappe.whitelist()
 def get_warehouses_for_project(project_name):
-	warehouses = frappe.get_all("Warehouse", 
-		filters={"lpeb_project": project_name}, 
+	warehouses = frappe.get_all("Warehouse",
+		filters={"lpeb_project": project_name},
 		fields=["*"])
 
 	if len(warehouses) > 4:
@@ -222,7 +221,7 @@ def get_warehouses_for_project(project_name):
 	#print "FG:", fg_warehouse, "WIP:", wip_warehouse
 
 	return {
-		"fg_warehouse": fg_warehouse[0], 
+		"fg_warehouse": fg_warehouse[0],
 		"wip_warehouse": wip_warehouse[0],
 		"qc_warehouse": qc_warehouse[0]
 	}
@@ -236,6 +235,6 @@ def get_memo_details_for_si_items(si_items, dispatch_order):
 
 	for si_item in si_items:
 		child_item_list = child_item_list + [sfi for sfi in do.shop_floor_items if sfi.parent_item == si_item.get("item_code")]
-			
+
 	print "Child Item List", child_item_list
 	return child_item_list
