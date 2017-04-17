@@ -221,17 +221,17 @@ def get_warehouses_for_project(project_name):
 		fields=["*"])
 
 	if len(warehouses) > 4:
-		frappe.throw("There may be only 4 warehouses for a project. (Parent, FG, WIP, QC)<br> There appear to be {0}".format(len(warehouses)))
+		frappe.throw("There may be only 3 warehouses for a project. (Parent, FG, QC)<br> There appear to be {0}".format(len(warehouses)))
 
 	fg_warehouse = [wh for wh in warehouses if "FG" in wh.name]
-	wip_warehouse = [wh for wh in warehouses if "WIP" in wh.name]
+	#wip_warehouse = [wh for wh in warehouses if "WIP" in wh.name]
 	qc_warehouse = [wh for wh in warehouses if "QC" in wh.name]
 
 	#print "FG:", fg_warehouse, "WIP:", wip_warehouse
 
 	return {
 		"fg_warehouse": fg_warehouse[0],
-		"wip_warehouse": wip_warehouse[0],
+		#"wip_warehouse": wip_warehouse[0],
 		"qc_warehouse": qc_warehouse[0]
 	}
 
@@ -247,3 +247,11 @@ def get_memo_details_for_si_items(si_items, dispatch_order):
 
 	print "Child Item List", child_item_list
 	return child_item_list
+
+# def get_dispatched_qty_for_so(so_name):
+# 	so = frappe.get_doc("Sales Order", so_name)
+# 	existing_dispatch_orders = frappe.get_all("LPEB Dispatch Order", filters={"sales_order": so_name})
+
+# 	total_dispatched_qty = 0.0
+	
+# 	for soi in so.items:
