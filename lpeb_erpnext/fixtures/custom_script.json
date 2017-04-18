@@ -2,6 +2,15 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Script", 
+  "dt": "Delivery Note", 
+  "modified": "2017-04-18 13:44:01.006595", 
+  "name": "Delivery Note-Client", 
+  "script": "\nfrappe.ui.form.on(\"Delivery Note\", {\n    \"onload\": function(frm) {\n            frappe.call({\n                \"method\": \"lpeb_erpnext.api.get_memo_details_for_si_items\",\n                \"args\": { \"si_items\": cur_frm.doc.items, \"dispatch_order\": cur_frm.doc.dispatch_order },\n                \"callback\": function(r) {\n                    if (r.message) {\n                        $.each(r.message, function(index, item) {\n                            var row = frappe.model.add_child(cur_frm.doc, \"LPEB Sales Invoice Item Detail\", \"lpeb_item_details\");\n                            row.item_code = item.item_code;\n                            row.weight = item.weight;\n                            row.uom = item.uom;\n                        });\n                    }\n                }\n            });\n    }\n});\n", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
   "dt": "Sales Order", 
   "modified": "2017-04-11 01:02:37.965381", 
   "name": "Sales Order-Client", 

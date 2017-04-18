@@ -105,9 +105,9 @@ function fetch_shop_item(frm,item_code) {
                     row.item_code = d.item_code;
                     row.qty = d.qty;
                     row.uom = d.uom;
-                    row.warehouse = d.warehouse;
                     row.unit_weight = d.unit_weight;
                     row.weight = d.unit_weight * d.qty;
+                    row.warehouse = d.warehouse;
                     row.parent_item = d.parent_item;
                     row["max_qty"] = d.qty;
                 }
