@@ -124,6 +124,7 @@ fixtures = [{"dt":"Custom Script", "filters": [["name", "in", ["Delivery Note-Cl
                                                 "Sales Invoice-lpeb_dispatch_order",
                                                 "Delivery Note-lpeb_item_details",
                                                 "Delivery Note-lpeb_dispatch_order",
-                                                "Stock Entry-lpeb_dispatch_order"]]]},
+                                                "Stock Entry-lpeb_dispatch_order",
+                                                "BOM Item-lpeb_unit_weight"]]]},
             {"dt": "Print Format", "filters": [["name", "in", ["Dispatch Order"]]]}, "Property Setter"]
 

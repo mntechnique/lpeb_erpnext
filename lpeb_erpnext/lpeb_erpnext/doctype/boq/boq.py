@@ -60,7 +60,8 @@ class BOQ(Document):
 						b_sa.append("items", {
 							"item_code": child.item,
 							"qty": child.qty,
-							"stock_uom": child.uom
+							"stock_uom": child.uom,
+							"lpeb_unit_weight":child.unit_weight
 						})
 
 					b_sa.save()
@@ -86,7 +87,8 @@ class BOQ(Document):
 						b_fg.append("items", {
 							"item_code": child.item,
 							"qty": child.qty,
-							"bom_no": frappe.db.get_value("BOM", {"project": self.project, "item": child.item}, "name")
+							"bom_no": frappe.db.get_value("BOM", {"project": self.project, "item": child.item}, "name"),
+							"lpeb_unit_weight":child.unit_weight
 						})
 
 					b_fg.save()
