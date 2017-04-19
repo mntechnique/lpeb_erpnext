@@ -3,6 +3,13 @@
 
 frappe.ui.form.on('LPEB Dispatch Order', {
     refresh: function(frm) {
+        cur_frm.set_query("sales_order", function() {
+            return {
+                filters: {
+                    "docstatus": 1
+                }
+            }
+        });
         cur_frm.set_query("item_code", "office_items", function() {
             return {
                 query: "lpeb_erpnext.api.bomitems_for_project",
