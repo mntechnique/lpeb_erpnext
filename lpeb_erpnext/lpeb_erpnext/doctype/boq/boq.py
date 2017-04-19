@@ -60,7 +60,8 @@ class BOQ(Document):
 						b_sa.append("items", {
 							"item_code": child.item,
 							"qty": child.qty,
-							"stock_uom": child.uom
+							"stock_uom": child.uom,
+							"lpeb_unit_weight": child.unit_weight
 						})
 
 					b_sa.save()

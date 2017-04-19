@@ -253,5 +253,5 @@ def get_memo_details_for_si_items(si_items, dispatch_order):
 # 	existing_dispatch_orders = frappe.get_all("LPEB Dispatch Order", filters={"sales_order": so_name})
 
 # 	total_dispatched_qty = 0.0
-	
+
 # 	for soi in so.items:
