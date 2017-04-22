@@ -236,17 +236,27 @@ def get_warehouses_for_project(project_name):
 	}
 
 @frappe.whitelist()
-def get_memo_details_for_si_items(si_items, dispatch_order):
+def get_memo_details_for_si_items(si_items=None, dispatch_order=None):
 	si_items = json.loads(si_items)
-
+	print "si_items", si_items, "dispatch Order", dispatch_order
 	child_item_list = []
 	do = frappe.get_doc("LPEB Dispatch Order", dispatch_order)
 
 	for si_item in si_items:
 		child_item_list = child_item_list + [sfi for sfi in do.shop_floor_items if sfi.parent_item == si_item.get("item_code")]
 
-	print "Child Item List", child_item_list
-	return child_item_list
+	out = []
+	for sfi in child_item_list:
+		i = {
+			"item_code": sfi.item_code,
+			"item_name": frappe.db.get_value("Item", filters={"item_code":sfi.item_code}, fieldname="item_name"),
+			"weight": sfi.weight,
+			"uom": sfi.uom,
+			"parent_item": sfi.parent_item,
+		}
+		out.append(i)
+	print "Child Item List", out
+	return out
 
 # def get_dispatched_qty_for_so(so_name):
 # 	so = frappe.get_doc("Sales Order", so_name)
