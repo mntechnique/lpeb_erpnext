@@ -3,6 +3,13 @@
 
 frappe.ui.form.on('LPEB Dispatch Order', {
     refresh: function(frm) {
+        cur_frm.set_query("sales_order", function() {
+            return {
+                filters: {
+                    "docstatus": 1
+                }
+            }
+        });
         cur_frm.set_query("item_code", "office_items", function() {
             return {
                 query: "lpeb_erpnext.api.bomitems_for_project",
@@ -105,8 +112,7 @@ function fetch_shop_item(frm,item_code) {
                     row.item_code = d.item_code;
                     row.qty = d.qty;
                     row.uom = d.uom;
-                    row.unit_weight = d.unit_weight;
-                    row.weight = d.unit_weight * d.qty;
+                    row.weight = d.weight;
                     row.warehouse = d.warehouse;
                     row.parent_item = d.parent_item;
                     row["max_qty"] = d.qty;

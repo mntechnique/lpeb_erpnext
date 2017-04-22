@@ -1727,7 +1727,7 @@
   "doctype": "Property Setter", 
   "doctype_or_field": "DocType", 
   "field_name": null, 
-  "modified": "2017-04-19 15:59:32.503207", 
+  "modified": "2017-04-19 16:49:01.927092", 
   "name": "BOM Item-read_only_onload", 
   "property": "read_only_onload", 
   "property_type": "Check", 
