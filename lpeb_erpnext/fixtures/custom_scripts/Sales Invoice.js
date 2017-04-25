@@ -25,16 +25,17 @@ frappe.ui.form.on("Sales Invoice", {
             }
         });
      //fetch lpeb item detail on make delivery note in sales invoice
-       /* if (frm.doc.docstatus == 1) {
+        if (frm.doc.docstatus == 1) {
             frm.add_custom_button(__('Delivery Note '), function(){
                if (cur_frm.doc.dispatch_order == "") {
                     frappe.msgprint("Please select dispatch order.")
                 } else {
+                    console.log("si_name",cur_frm.doc.name, "si_items",cur_frm.doc.items,"lpeb_dispatch_order",cur_frm.doc.lpeb_dispatch_order);
                     frappe.call({
-                        method: "lpeb_erpnext.api.create_del_note",
-                        doc: cur_frm.doc,
-                        args: {
-                             "si_items": cur_frm.doc.items,
+                        "method": "lpeb_erpnext.api.create_del_note",
+                        "args": {
+                             "si_name": cur_frm.doc.name,
+                             "lpeb_item_details": cur_frm.doc.lpeb_item_details,
                              "lpeb_dispatch_order": cur_frm.doc.lpeb_dispatch_order,
                                 },
                         callback: function (r) {
@@ -45,6 +46,6 @@ frappe.ui.form.on("Sales Invoice", {
                     });
                 }
             });
-        }*/
+        }
     }
 });
