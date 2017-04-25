@@ -245,6 +245,7 @@ def get_memo_details_for_si_items(si_items=None, dispatch_order=None):
 			"item_code": sfi.item_code,
 			"item_name": frappe.db.get_value("Item", filters={"item_code":sfi.item_code}, fieldname="item_name"),
 			"weight": sfi.weight,
+			"qty": sfi.qty,
 			"uom": sfi.uom,
 			"parent_item": sfi.parent_item,
 		}
@@ -259,3 +260,29 @@ def get_memo_details_for_si_items(si_items=None, dispatch_order=None):
 # 	total_dispatched_qty = 0.0
 
 # 	for soi in so.items:
+
+# def create_del_note(self):
+# 		from erpnext.selling.doctype.sales_invoice.sales_invoice import make_delivery_note
+
+# 		si = make_delivery_note(self.sales_order)
+# 		si.lpeb_dispatch_order = self.name
+
+# 		for sfi in self.shop_floor_items:
+# 			si.append("lpeb_item_details", {
+# 				"item": sfi.item_code,
+# 				"weight": sfi.weight,
+# 				"qty": sfi.qty,
+# 				"uom": sfi.uom,
+# 				"parent_item": sfi.parent_item
+# 			})
+
+# 		try:
+# 			si.save()
+# 			frappe.db.commit()
+# 		except Exception as e:
+# 			return "Could not create Sales Invoice. <br>{0}".format(e.message)
+# 		else:
+# 			return "Sales Invoice #{0} created successfully.".format(si.name)
+
+
+

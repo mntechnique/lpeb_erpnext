@@ -17,6 +17,7 @@ frappe.ui.form.on("Delivery Note", {
                                 var row = frappe.model.add_child(cur_frm.doc, "LPEB Delivery Note Item Detail", "lpeb_item_details");
                                 row.item = item.item_code;
                                 row.item_name = item.item_name;
+                                row.qty = item.qty;
                                 row.weight = item.weight;
                                 row.uom = item.uom;
                                 row.parent_item = item.parent_item;

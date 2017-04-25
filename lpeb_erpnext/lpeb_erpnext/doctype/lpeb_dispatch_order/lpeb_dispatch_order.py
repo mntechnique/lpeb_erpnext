@@ -11,7 +11,7 @@ from lpeb_erpnext.api import get_warehouses_for_project
 from erpnext import get_default_company
 
 class LPEBDispatchOrder(Document):
-	
+
 	def on_submit(self):
 		self.validate_warehouse()
 		self.validate_actual_qty()
@@ -49,7 +49,7 @@ class LPEBDispatchOrder(Document):
 
 		for item in self.shop_floor_items:
 			item_group = frappe.db.get_value("Item",{"item_code": item.item_code}, fieldname="item_group")
-			
+
 			if item_group == "Sub Assemblies":
 				fg_wh = self.project + " - FG"
 				warehouse1 = frappe.db.get_value("Warehouse", filters={
@@ -91,19 +91,19 @@ class LPEBDispatchOrder(Document):
 				frappe.throw("Item '{0}' does not belong to Sales Order '{1}'.".format(oi.item_code, self.sales_order))
 
 			#Weight cap on total SO item weight.
-			if oi.weight > so_item[0].qty: 
+			if oi.weight > so_item[0].qty:
 				frappe.throw("Weight of '{0}' cannot exceed {1} kg(s).".format(oi.item_code, so_item[0].qty))
 
 			#Weight cap on Shop Floor Items based on parent Office Item.
 			if sum([sfi.weight or 0.0 for sfi in self.shop_floor_items if sfi.parent_item == oi.item_code]) > oi.weight:
-				frappe.throw("Weight of component items for '{0}' cannot exceed {1} kg(s).".format(oi.item_code, oi.weight))				
+				frappe.throw("Weight of component items for '{0}' cannot exceed {1} kg(s).".format(oi.item_code, oi.weight))
 
 	def validate_shop_floor_items(self):
 		#Duplicates
 		if len(self.shop_floor_items) != len(set(self.shop_floor_items)):
 			frappe.throw("Please remove duplicate shop floor items.")
 
-		
+
 		for sfi in self.shop_floor_items:
 			#Item code not set in SFI
 			if not sfi.item_code:
@@ -111,7 +111,7 @@ class LPEBDispatchOrder(Document):
 			#Invalid weight
 			if not sfi.weight:
 				frappe.throw("Shop Floor Details #{0}: Please set weight for '{1}'".format(sfi.idx, sfi.item_code))
-	
+
 	def pre_submit_validation(self):
 		if (len(self.office_items) == 0):
 			frappe.throw("Please enter at least one item under Office Details Details.")
@@ -174,7 +174,7 @@ class LPEBDispatchOrder(Document):
 
 	def create_si(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-		
+
 		si = make_sales_invoice(self.sales_order)
 		si.lpeb_dispatch_order = self.name
 
@@ -182,7 +182,9 @@ class LPEBDispatchOrder(Document):
 			si.append("lpeb_item_details", {
 				"item": sfi.item_code,
 				"weight": sfi.weight,
-				"UOM": sfi.weight_uom
+				"qty": sfi.qty,
+				"uom": sfi.uom,
+				"parent_item": sfi.parent_item
 			})
 
 		try:
@@ -192,5 +194,5 @@ class LPEBDispatchOrder(Document):
 			return "Could not create Sales Invoice. <br>{0}".format(e.message)
 		else:
 			return "Sales Invoice #{0} created successfully.".format(si.name)
-			
-		
+
+
