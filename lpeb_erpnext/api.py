@@ -261,28 +261,34 @@ def get_memo_details_for_si_items(si_items=None, dispatch_order=None):
 
 # 	for soi in so.items:
 
-# def create_del_note(self):
-# 		from erpnext.selling.doctype.sales_invoice.sales_invoice import make_delivery_note
+@frappe.whitelist()
+def create_del_note(si_name, lpeb_item_details, lpeb_dispatch_order):
+	for x in xrange(1,10):
+		print "si_name",si_name
+		print "si_items", lpeb_item_details
+		print "dispatch_order"
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 
-# 		si = make_delivery_note(self.sales_order)
-# 		si.lpeb_dispatch_order = self.name
+	si = make_delivery_note(si_name)
+	si.lpeb_dispatch_order = lpeb_dispatch_order
+	lpeb_item_details = json.loads(lpeb_item_details)
+	for sfi in lpeb_item_details:
+		si.append("lpeb_item_details", {
+			"item": sfi.get("item"),
+			"weight": sfi.get("weight"),
+			"qty": sfi.get("qty"),
+			"uom": sfi.get("uom"),
+			"parent_item": sfi.get("parent_item")
+		})
 
-# 		for sfi in self.shop_floor_items:
-# 			si.append("lpeb_item_details", {
-# 				"item": sfi.item_code,
-# 				"weight": sfi.weight,
-# 				"qty": sfi.qty,
-# 				"uom": sfi.uom,
-# 				"parent_item": sfi.parent_item
-# 			})
 
-# 		try:
-# 			si.save()
-# 			frappe.db.commit()
-# 		except Exception as e:
-# 			return "Could not create Sales Invoice. <br>{0}".format(e.message)
-# 		else:
-# 			return "Sales Invoice #{0} created successfully.".format(si.name)
+	try:
+		si.save()
+		frappe.db.commit()
+	except Exception as e:
+		return "Could not create delivery note. <br>{0}".format(e.message)
+	else:
+		return "Delivery Note #{0} created successfully.".format(si.name)
 
 
 
