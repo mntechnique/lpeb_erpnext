@@ -23,14 +23,6 @@ class LPEBDispatchOrder(Document):
 		self.validate_shop_floor_items()
 
 	def validate_actual_qty(self):
-		# dispatch_warehouses = frappe.get_doc("LPEB settings", "LPEB settings").dispatch_warehouses
-		# d_wh = None
-		# for wh in dispatch_warehouses:
-		# 	d_wh = wh.warehouse if wh.company == frappe.defaults.get_defaults().get("company") else None
-
-		# if not d_wh:
-		# 	frappe.throw("Please set Dispatch warehouse in LPEB Settings")
-
 		for d in self.get('shop_floor_items'):
 			if d.item_code:
 				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
@@ -44,8 +36,6 @@ class LPEBDispatchOrder(Document):
 		igm = {}
 		warehouse1 = ""
 		item_group = ""
-
-		#abbr = frappe.db.get_value("Company",frappe.defaults.get_defaults().company, fieldname="abbr")
 
 		for item in self.shop_floor_items:
 			item_group = frappe.db.get_value("Item",{"item_code": item.item_code}, fieldname="item_group")
@@ -90,13 +80,6 @@ class LPEBDispatchOrder(Document):
 			if len(so_item) == 0:
 				frappe.throw("Item '{0}' does not belong to Sales Order '{1}'.".format(oi.item_code, self.sales_order))
 
-			#Weight cap on total SO item weight.
-			if oi.weight > so_item[0].qty:
-				frappe.throw("Weight of '{0}' cannot exceed {1} kg(s).".format(oi.item_code, so_item[0].qty))
-
-			#Weight cap on Shop Floor Items based on parent Office Item.
-			if sum([sfi.weight or 0.0 for sfi in self.shop_floor_items if sfi.parent_item == oi.item_code]) > oi.weight:
-				frappe.throw("Weight of component items for '{0}' cannot exceed {1} kg(s).".format(oi.item_code, oi.weight))
 
 	def validate_shop_floor_items(self):
 		#Duplicates
@@ -108,9 +91,6 @@ class LPEBDispatchOrder(Document):
 			#Item code not set in SFI
 			if not sfi.item_code:
 				frappe.throw("Shop Floor Details #{0}: Please select an item, or delete the row.".format(sfi.idx))
-			#Invalid weight
-			if not sfi.weight:
-				frappe.throw("Shop Floor Details #{0}: Please set weight for '{1}'".format(sfi.idx, sfi.item_code))
 
 	def pre_submit_validation(self):
 		if (len(self.office_items) == 0):
@@ -121,15 +101,6 @@ class LPEBDispatchOrder(Document):
 
 		if (len([oi for oi in self.office_items if not oi.weight]) > 0):
 			frappe.throw("All items under Office Details must have valid weights.")
-
-		if (len([sfi for sfi in self.shop_floor_items if not sfi.weight]) > 0):
-			frappe.throw("All items under Shop Floor Details must have valid weights.")
-
-		# #Total weight cap
-		# total_office_items_weight = sum([oi.weight or 0.0 for oi in self.office_items])
-		# total_shop_floor_items_weight = sum([sfi.weight or 0.0 for sfi in self.shop_floor_items])
-		# if total_shop_floor_items_weight > total_office_items_weight:
-		# 	frappe.throw("Total weight of Shop Floor Details items cannot exceed total weight of Office Details items.")
 
 	def make_repack_entries(self):
 		project_warehouses = get_warehouses_for_project(self.project)
@@ -149,8 +120,6 @@ class LPEBDispatchOrder(Document):
 			re.company = get_default_company()
 
 			for sfi in sfi_list:
-			# 	print "sfi.item_code: ", sfi.item_code, ", sfi.qty: ", sfi.qty, ", sfi.uom: ", sfi.uom, ", source_wh", fg_warehouse
-			# print "oi.item_code: ", oi.item_code, ", oi.qty: ", oi.weight, ", oi.uom: ", oi.weight_uom, ", target_wh", fg_warehouse
 				re.append("items", {
 					"item_code": sfi.item_code,
 					"qty": sfi.qty,
@@ -162,7 +131,7 @@ class LPEBDispatchOrder(Document):
 			re.append("items", {
 				"item_code": oi.item_code,
 				"qty": oi.weight,
-				"uom": oi.weight_uom, #frappe.db.get_value("Item", oi.item_code, "stock_uom") or "Kg",
+				"uom": oi.weight_uom,
 				"conversion_factor": 1.0,
 				"t_warehouse": fg_warehouse.name
 			})
@@ -181,7 +150,6 @@ class LPEBDispatchOrder(Document):
 		for sfi in self.shop_floor_items:
 			si.append("lpeb_item_details", {
 				"item": sfi.item_code,
-				"weight": sfi.weight,
 				"qty": sfi.qty,
 				"uom": sfi.uom,
 				"parent_item": sfi.parent_item
